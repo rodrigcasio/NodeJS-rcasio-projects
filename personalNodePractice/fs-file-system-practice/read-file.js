@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const fileName = 'notes.txt';
 
-console.log(`Program started. Asking the OS to find and read the file`);
+console.log(`1. Program started. Asking the OS to find and read the file`);
 
 fs.readFile(fileName, 'utf-8', (err, data) => {
                 // This callback runs LATER, after the file is read
