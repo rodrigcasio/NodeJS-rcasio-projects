@@ -7,7 +7,9 @@ weather.current(location, (err, temp_f) => {
     
     // 1. handle err : (if error exists, log failure and stop)
     if(err){
-        console.error(`ERROR: Could not fetch weather for ${location}.`)
+        console.error(`ERROR: Could not fetch weather for ${location}. writing this explicitly:`)
+        console.error(`error code : ${err.code}`);
+        console.error(`HOSTNAME: ${err.hostname}`);
         console.error(`Details: ${err.message}`);
         return;
     }
@@ -17,7 +19,12 @@ weather.current(location, (err, temp_f) => {
 });
 
 
-/*  ANOTHER WAY TO HANDLE ERROR,
+/*  
+    (for learning purposes:)
+    Loggin the entire object is valuable since it lets you inspect the structure and learn the property names (code, errno, hostname) 
+    that you we can use for customize error messages or conditional logic 
+
+    ANOTHER WAY TO HANDLE ERROR,
     LOGGIN THE ENTIRE OBJECT ERROR 
     
     // handle err : (if error exists, log object error)

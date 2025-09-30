@@ -1,5 +1,4 @@
 
-
 const parseString = (data, callback) => {
     callback(null, {current_observation: { temp_f: [data] } });
 }
