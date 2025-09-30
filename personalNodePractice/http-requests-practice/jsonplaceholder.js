@@ -2,6 +2,8 @@
 // Demonstrates basic Asynchronous, Non-blocking I/O in Node.js by performing 
 // an ongoing HTTPS GET request to a third-party API (JSONPlaceholder).
 
+// using GET request to retrieve data from JSONPlaceholder server
+
 const https = require('https');
 
 const options = {
