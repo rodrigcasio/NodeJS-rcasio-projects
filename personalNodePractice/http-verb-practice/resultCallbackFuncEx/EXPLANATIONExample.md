@@ -31,15 +31,18 @@ This pattern involves two layers of asynchronous callbacks to pass the final res
 ## 📝 Code Breakdown 
 
 - **A. The Module**(`get-weather2.js`)
-    
--- `exports.current = (location, resultCallback) => { ... }`   : Defines the module's public function, accepting the **Application Callback** as the final argument.
--- `const req = http.request(...)` : Initializes the request and saves the Request Object (`req`) to attach the high-level error listener.
--- `req.on('error', (err) => { resultCallback(err); });` : **Catches network/DNS errors** and returns them immediately to the main application (`index.js`). 
--- `parseString(buffer, (err, result) => { ... });` : **Mocks data parsing**. This is where application logic errors are checked before final success.
--- `resultCallback(null, result..)` : The final point of execution for success path passing the data back to the customer (`index.js`).
+| Key Line | Purpose |
+| :--- | :---|
+| `exports.current = (location, resultCallback) => { ... }` | Defines the module's public function, accepting the **Application Callback** as the final argument. |
+| `const req = http.request(...)` | Initializes the request and saves the Request Object (`req`) to attach the high-level error listener. |
+| `req.on('error', (err) => { resultCallback(err); });` | **Catches network/DNS errors** and returns them immediately to the main application (`index.js`). | 
+| `parseString(buffer, (err, result) => { ... });` | **Mocks data parsing**. This is where application logic errors are checked before final success. |
+|`resultCallback(null, result..)` | The final point of execution for success path passing the data back to the customer (`index.js`). |
 
 - **B. The Application**(`index.js`)
 
--- `weather.current(location, (err, temp_f) => { ... })` : **Calls the module** and defines the anonymous function that will run asynchronously upon completion.
--- `if(err) { ... }` : The standard pattern: Check the **error parameter first**. If present, log the failure (using custom data like `err.code` and `err.hostname`) and stop execution. 
--- `console.log(...)` : The success path: if `err` is null, the result is available to be processed.
+| Key Line | Purpose |
+| :--- | :--- |
+| `weather.current(location, (err, temp_f) => { ... })` | **Calls the module** and defines the anonymous function that will run asynchronously upon completion. |
+| `if(err) { ... }` | The standard pattern: Check the **error parameter first**. If present, log the failure (using custom data like `err.code` and `err.hostname`) and stop execution. |
+| `console.log(...)` | The success path: if `err` is null, the result is available to be processed. |
