@@ -49,3 +49,6 @@ methCall
 // 10. When the Promise finishes :
 //     - If successful, print the file contents.
 //     - if there is an error, 'Error reading file'
+
+// creating the promise with 'new Promise() starts it automatically.
+// console.log(methCall) : this just prints the promise object it does not start or trigger anything
