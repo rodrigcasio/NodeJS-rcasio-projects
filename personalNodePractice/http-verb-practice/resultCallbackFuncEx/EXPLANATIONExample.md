@@ -57,3 +57,37 @@ This pattern involves two layers of asynchronous callbacks to pass the final res
 | **Show Result** | 4. Passes final clean data via the `resultCallback(null, result...)`. | 5. Receives the `result` and renders it on the user's webpage |
 
 - by separating the logic, your main application (`index.js`) doesn't care if the network failed of the the data was bad; it only has to deal with two clear results: **either an `error` or a `result`**. This makes the application simplier cleaner, and less prone to crashing
+
+## 📋 Order of execution in `get-weather2.js`
+
+**Phase 1: Synchronous Setup (Immediate Execution)**
+
+This phase runs instantly, without waiting for the network, until the `req.end()` is hit.
+
+1. **Function Call**: The `exports.current(location, resultCallback)` function is called by the main application (`index.js`).
+2. **Options Setup**: The `options` object (containing the `host` and `path`) is defined.
+3. **Request Initialization**: The `const req = http.request(options, (res) => { ... })` call starts the request process. The function isnide ( `(res) => { ... } `) is **registered** as the response callback!**, but is **not run yet**.
+4. **Error Listener Registered**: The `req.on('error', (err) => { ... })` listener is attached to the request object. This prepares the module to catch immediate network failure.
+5. **Request Sent**: The `req.end()` method is called, which actually sends teh request out over the network to the server.
+
+*(At this point, module function finishes, and control returns the main application, which immediately executes its synchronous code. The Node.js event loop now waits for the network response or an error)*
+
+**Phase 2: Asynchronous Handling (Triggered by Events)**
+
+One of two primary events will now trigger an asynchronous block of code.
+
+**A. Failure Path (Network Error)** 
+- **Trigger**: The system fails to resolve the hostname (`w1.weather.gov`) or connect
+- **Action**: The `req.on('error', (err) => { ... })` listener is immediately triggered.
+- **Result**: The module calls `resultCallback(err)`, passing the error back to `index.js`, and the module's work is complete.
+
+**B. Success Path (Successful Network Connection)**
+- **Trigger**: A success connection is established, and the server sends a response.
+- **Action 1 (Data Stream)**: The `res.on('data', (chunk) => { ... })` callback runs repeatedly as data arrives from the server, continously building the `buffer` string.
+- **Action 2 (Data End)**: The `res.on('end', () => { ... })` callback runs only once, when the entire response has been received.
+- **Action 3 (Parsing/App Error Check)**: The `parseString(buffer, (err, result) => { ... })` function is called.
+    - **If `err` exists (Parsing Failure)**: The module calls `resultCallback(resul)` to report the data error.
+    - **If `err` is null (Parsing success)**: The module calls `resultCallback(null, result.current_observation.temp[0])`, sending the clean data back to `index.js`.
+
+
+The entire process is race between in **Network Error Listener** and the **Response Listener**, with the **Application Callback** being the final fucntion executed in either case.
