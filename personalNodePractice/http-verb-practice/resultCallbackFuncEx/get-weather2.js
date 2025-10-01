@@ -5,7 +5,7 @@ const parseString = (data, callback) => {
 
 const http = require('http');
 
-exports.current = (location, resultCallback) => {
+exports.current = (location, resultCallback) => {       // Store the request object as 'req'
     let options = {
         host: 'w1.weather.gov',
         path: '/xml/current_obs/' + location + '.xml'
