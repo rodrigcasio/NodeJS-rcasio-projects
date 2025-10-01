@@ -13,7 +13,7 @@ let fs = require('fs');
 
 const methCall = new Promise((resolve, reject) => {
     setTimeout(() => {
-        let filename = prompt('What is the name of the file?');
+        let filename = prompt('What is the name of the file? ');
         try{
             const data = fs.readFileSync(filename, {encoding: 'utf8', flag: 'r'});
             resolve(data);
