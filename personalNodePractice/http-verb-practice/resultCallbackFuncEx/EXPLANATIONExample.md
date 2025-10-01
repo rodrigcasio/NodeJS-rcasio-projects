@@ -30,7 +30,7 @@ This pattern involves two layers of asynchronous callbacks to pass the final res
 
 ## 📝 Code Breakdown 
 
-- **A. The Module**(`get-weather2.js`)
+### A. The Module (`get-weather2.js`)
 | Key Line | Purpose |
 | :--- | :---|
 | `exports.current = (location, resultCallback) => { ... }` | Defines the module's public function, accepting the **Application Callback** as the final argument. |
@@ -39,10 +39,21 @@ This pattern involves two layers of asynchronous callbacks to pass the final res
 | `parseString(buffer, (err, result) => { ... });` | **Mocks data parsing**. This is where application logic errors are checked before final success. |
 |`resultCallback(null, result..)` | The final point of execution for success path passing the data back to the customer (`index.js`). |
 
-- **B. The Application**(`index.js`)
+### B. The Application (`index.js`)
 
 | Key Line | Purpose |
 | :--- | :--- |
 | `weather.current(location, (err, temp_f) => { ... })` | **Calls the module** and defines the anonymous function that will run asynchronously upon completion. |
 | `if(err) { ... }` | The standard pattern: Check the **error parameter first**. If present, log the failure (using custom data like `err.code` and `err.hostname`) and stop execution. |
 | `console.log(...)` | The success path: if `err` is null, the result is available to be processed. |
+
+## 🌎 Use case: why this pattern matters
+
+| Action required | Module's Responsability (`get-weather2.js` role) | Aplication's Responsability (`index.js` role) |
+| :--- | :--- | :--- |
+| **Fetch Data** | 1. **Makes HTTP request** to Twitter/X API to get user feed. | N/A |
+| **Process Data** | 2. **Parses the JSON** response, checks for valid structure, and removes sensitive fields. | N/A |
+| **Failures** | 3. **If network fails**: Returns `err` object. **If JSON is invalid**: Returns `err` object. | N/A |
+| **Show Result** | 4. Passes final clean data via the `resultCallback(null, result...)`. | 5. Receives the `result` and renders it on the user's webpage |
+
+- by separating the logic, your main application (`index.js`) doesn't care if the network failed of the the data was bad; it only has to deal with two clear results: **either an `error` or a `result`**. This makes the application simplier cleaner, and less prone to crashing
