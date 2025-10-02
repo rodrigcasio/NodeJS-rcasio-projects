@@ -44,7 +44,6 @@ myPromise
 
 console.log(`after calling promise`);
 ```
-
 ## Output 
 
 ```
