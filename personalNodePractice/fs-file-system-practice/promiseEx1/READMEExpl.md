@@ -63,7 +63,7 @@ Hello ! I am line from the "textFile.txt" file !
 
 code
 
-```
+```js
 let prompt = require('prompt-sync')();      
 let fs = require('fs');
 
