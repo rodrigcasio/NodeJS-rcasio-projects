@@ -11,6 +11,13 @@ I mainly wanted to make use of and `async/await` function for a HTTP request tha
 1. **Bridging Callbacks to Promises**. In the first function `asyncFunc()` which can identified as `(Promisifier)` uses the **Promise** constructor to 'wrap' the callback-based `https.request`. I found out that this technique called **promisification**, and it is the standard way to convert older asynchronous functions into a Promise-based form.
 
 ```js
+const https = require('https');
+
+const option = {
+    hostname: 'jsonplaceholder.typicode.com',
+    path: '/users',
+    method: 'GET'
+};
 const asyncFunc = async () => {
     return new Promise((resolve, reject) => {
         const req = https.request(option, (res) => {
