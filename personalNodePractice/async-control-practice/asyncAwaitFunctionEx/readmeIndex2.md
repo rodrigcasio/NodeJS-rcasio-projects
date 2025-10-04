@@ -49,7 +49,8 @@ console.log(`2. Please wait...`);       // (sync)
 ```
 
 ## Output 
-```
+
+```zsh
 node index2.js
 1. Starting data processing...
 2. Please wait...
