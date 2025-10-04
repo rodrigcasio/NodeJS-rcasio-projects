@@ -1,6 +1,6 @@
 // Another example using async/await function
 
-const fetchData = async (delay) => {
+const fetchData = (delay) => {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             if(typeof delay === 'number' && delay > 0){
