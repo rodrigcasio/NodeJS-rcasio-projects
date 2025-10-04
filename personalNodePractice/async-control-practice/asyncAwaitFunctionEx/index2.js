@@ -15,18 +15,24 @@ const fetchData = (delay) => {
 const processData = async () => {
     console.log(`1. Starting data processing...`);      //  (sync)
     try {
-        const result1 = await fetchData(4000);
+        const result1 = await fetchData(4000);      // (async)
         console.log(result1);  
         
-        const result2 = await fetchData(3000);
+        const result2 = await fetchData(3000);      // (async)
         console.log(result2);
-        console.log(`Data Processed Complete ✅`);
+
+        const result3 = await fetchData();      // this rejected Promise will trigger catch block
+        console.log(result3);
+
+        const result4 = await fetchData(2000);    // wont be processed 
+        console.log(result4);
+
     } catch (err){
-        console.error(`Data not processed`, err.message);
-    }  
+        console.error(`Data not processed ❌`, err.message);
+    }
+    console.log(`Data Process concluded ☑️`);
 }
 
 // calling the async function
 processData();
-
 console.log(`2. Please wait...`);       // (sync)
