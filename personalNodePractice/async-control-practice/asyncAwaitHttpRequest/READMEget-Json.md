@@ -1,5 +1,5 @@
 ## Implementing async/await function with Promise in a HTTP request.
-- about file `getJasonPlaceholder.js`
+- about file `get-JasonPlaceholder.js`
 
 In `getJsonPlaceholder.js`, We made use of `async/await` function to handle a **Promise** that wraps a HTTP request.
 - This example showcases a **proper and common pattern** for modern JavaScript/Node.js to handle asynchronous operations like HTTP request that are originally on **callbacks** (like http.request)
