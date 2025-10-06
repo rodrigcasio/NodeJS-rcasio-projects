@@ -7,10 +7,10 @@ const postData = async () => {
         const response = await axios.post('https://jsonplaceholder.typicode.com/posts', { name: 'Rodrigo', age: 26, userId: 1});
         
         console.log(`Post Created successfully ✅`);
-        console.log(response.data); 
+        console.log('Response Data:', response.data); 
         console.log('Response Status:', response.status);
    } catch (err) {
-        console.error('Error Posting Data', err);
+        console.error('Error Posting Data ❌', err);
    }
 }
 
