@@ -27,6 +27,9 @@ const postData = async () => {
         console.error('Error posting data ❌', err);
     }
 }
+
+// calling async function
+postData();
 ```
 
 ## Output
