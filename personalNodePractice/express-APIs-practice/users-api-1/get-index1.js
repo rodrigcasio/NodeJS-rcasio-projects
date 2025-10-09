@@ -12,9 +12,9 @@ app.get('/', (req, res) => {
 
 app.get('/fetch-users', async (req , res) => {
     try {
-        const response = await axios.get('http://jsonplaceholder.typicode.com/users');
+        const response = await axios.get('http://jsonplaceholder.typicode.com/users');        // Axios automatically runs JSON.parse() on the received text
         console.log(`Data fetched successfully ✅`);
-        res.json(response.data);
+        res.json(response.data);              // here is not necessary to use  JSON.parse(response.data)
     } catch (err) {
         res.status(500).send('Error fetching data');
     }
