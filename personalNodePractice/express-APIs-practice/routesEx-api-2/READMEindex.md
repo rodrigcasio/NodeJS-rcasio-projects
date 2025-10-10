@@ -55,78 +55,89 @@ This file manages the requests for the path base `/user`.
 ## Code
 
 
-`index.js` The main control center
+### `index.js` The main control center
 
 ```js
+// Main application
 const express = require('express');
 const app = express();
 const port = 3000;
 
+const userRouter = require('./userRoute');  // importing route modules
 const itemRouter = require('./itemRoute');
-const userRouter = require('./userRoute');
 
-app.use('/item', itemRouter);
+app.use('/item', itemRouter);       // attach the routers to specific base paths
 app.use('/user', userRouter);
 
+// Base route for testing
 app.get('/', (req, res) => {
     res.send('Welcome to the Modular Express Server');
 });
 
-app.listen(port, (req, res) => {
+// start server
+app.listen(port, () => {
     console.log(`Modular Express server listening at http://localhost:${port}`);
 });
 
+
+
+
 ```
 
-`itemRoute.js` The **Item manager**
+### `itemRoute.js` The **Item manager**
 
 ```js
 const express = require('express');
-const router = express.Router();
-
 const axios = require('axios');
 
+const router = express.Router();     // creating router instance 
+
+// middleware example: this runs before every route in 'itemRouter'
 router.use((req, res, next) => {
-    console.log(`[Item Router] Request received at ${new Date().toISOString()}`);
+    console.log(`[Item Router] Request received at: ${new Date().toISOString()}`);
+    next();
 });
 
 router.get('/', (req, res) => {
-    res.send(`You reached the Item home page`);
+    res.send('You reached the Item home page.');
+});
+
+router.get('/about/:id', (req, res) => {
+    const userId = req.params.id;
+    res.send(`Information about item: ${userId}`);
 });
 
 router.get('/fetch/posts', async (req, res) => {
     try {
         const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
         res.json({
-            message: 'Successfully fetched posts via Axios',
-            data: response.data.slice(0. 5)
+            message: 'Succesfully fetched posts via Axios!',
+            data: response.data.slice(0, 5)         // returning only the first 5
         });
     } catch (err) {
-        console.log(`Error fetching data`);
-        res.status(500).send('Error fetching data from an external API');
+        console.error(`Error fetching data:`, err.message);
+        res.status(500).send(`Error fetching data from external API`);
     }
 });
 
-router.get('/about/:id', (req, res) => {
-    const userId = req.params.id;
-    res.send(`Information about item: ${userId}`)
-});
-
+// export router instance
 module.exports = router;
 ```
 
-`userRoute.js` The **user manager**
+### `userRoute.js` The **user manager**
 ```js
+
 const express = require('express');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.send('You reached the User home page!');
+    res.send(`You reached the User home page`);
 });
 
 router.get('/:userId', (req, res) => {
     const userId = req.params.userId;
-    res.send(`Fetching details for User ID: ${userId}`);
+    // quicknote : if wanted to fetch data user from external API here, we would put Axios call here, similar to the itemRouter
+    res.send(`Fething details for User ID: ${userId}`);
 });
 
 module.exports = router;
