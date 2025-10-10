@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 
 // start server
 app.listen(port, () => {
-    console.log(`Modular Express server listening at https://localhost:${port}`);
+    console.log(`Modular Express server listening at http://localhost:${port}`);
 });
 
 

@@ -1,5 +1,7 @@
 // handle the /item paths and including axios request
-
+// '/item/'  base route
+// '/item/about/#/ 
+// '/item/fetch/posts
 const express = require('express');
 const axios = require('axios');
 
