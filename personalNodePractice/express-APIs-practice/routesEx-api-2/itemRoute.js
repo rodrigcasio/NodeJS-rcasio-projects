@@ -7,7 +7,7 @@ const axios = require('axios');
 
 const router = express.Router();     // creating router instance 
 
-// middleware example: this runs before every route in 'itemRouter'
+// router-level middleware: this runs before every route in 'itemRouter'
 router.use((req, res, next) => {
     console.log(`[Item Router] Request received at: ${new Date().toISOString()}`);
     next();
