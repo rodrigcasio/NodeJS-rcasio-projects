@@ -1,0 +1,17 @@
+{
+  "name": "errorapp-middleware-api-4",
+  "version": "1.0.0",
+  "description": "an API example to practice error-handling middleware",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "express": "^5.1.0"
+  }
+}
