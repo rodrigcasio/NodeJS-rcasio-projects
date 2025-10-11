@@ -1,21 +1,21 @@
 // /profile router is independent
+// Code order : Setup -> Middlewares -> Routes (endpoints) -> Error Handler -> Export module
 
 const express = require('express');
 const axios = require('axios');
 
 const router = express.Router();
 
-// 1. notification router-level middleware
+// 1. === Router-level middlewares ===
+
+// 1- Notification Router-level Middleware (runs first)
 router.use((req, res, next) => {
     console.log(`[Profile Router] Requested at ${new Date().toISOString()}`);
     next();
 });
 
-router.get('/', (req, res) => {
-    res.send(`🏠 Welcome to the Profile Home Page. Access your profile with your '/profile/# ID number 📋`);
-});
-
-// 2. router-level middlware checking user id number other than admin.. which is 1
+// 1.1 === Scoped level middleware ===
+//Middleware Checking User ID (throws error if user places /profile/1)
 router.use('/:id', (req, res, next) => {
     if (req.params.id == 1){
         throw new Error('You are no allowed to check the profile of admin! ❌');
@@ -26,13 +26,10 @@ router.use('/:id', (req, res, next) => {
     }
 });
 
-// error handler middleware, which catches the error thrown!
-router.use((err, req, res, next) => {
-    if (err !== null){
-        res.status(500).send(err.toString());
-    } else {
-        next();
-    }
+// 2. === Final Routes (endpoints) ===
+
+router.get('/', (req, res) => {
+    res.send(`🏠 Welcome to the Profile Home Page. Access your profile with your '/profile/# ID number 📋`);
 });
 
 router.get('/:id', (req, res) => {
@@ -49,9 +46,22 @@ router.get('/fetch/friends', async (req, res) => {
     } catch (err) {
         console.log(err.message);
         res.status(500).send('Error fetching friends data');
+        throw err;
     }
 });
 
+// 3. === Router-Level Error Middleware ===
+
+// The final catch-all errors for this router (/profile)
+router.use((err, req, res, next) => {
+    if (err !== null){
+        res.status(500).send(`[Local route error Handler] Error: ${err.toString()}`);
+    } else {
+        next();
+    }
+});
+
+// 4. === export module ===
 module.exports = router;
 
 
