@@ -1,5 +1,7 @@
 # ✍︎ Example of an **Express API** with `Application-level` and `Router-level` middleware
 
+*Understanding how to implement Application-level middlewares*
+
 - `index.js`: Main application
 - `shopRoute`: Router handler for `/shop`
 
@@ -20,11 +22,28 @@ In this API, we are introducing the concept of `Application-level middleware` an
 |Code| Concept|
 |:---|:---|
 |`app.use((req, res, next) => { ... })`|**Application-Level Middleware Definition**(acts as a global check)|
-|`if (req.params.password !== 'pwd1234'){ return  res.status(402).send(...) }`| **Middleware short circuit** (blocking unauthorized requests)|
+|`if (req.query.password !== 'pwd1234'){ return  res.status(402).send(...) }`| **Middleware short circuit** (blocking unauthorized requests)|
 |**Placing the** `app.use((req, res, next) => { ... })` `middleware` **before** `app.use('/short', shopRouter)`| Importance of execution order. (Security before access)|
 
-## Code
+## Password relies on **query parameter** named `password`
 
+When an user navigate to the server, lets say... to the **Home page** with `http://localhost:3000/?password=pwd1234`, the password is only recognized for this first request (typing the URL with password). When a URL is clicked  or typed a new path, the browser sends a **new**, entirely separate request** fo that new path, and the query parameter is lost.
+
+### How to access the **Shop Route**
+*Important*
+
+To access the `/shop` route, or any other route protected by your Application-Level Middleware, it is a **must**! to include `?password=pwd1234` **query parameter in the URL for that specific route**
+
+|Route to Access| URL to Type (Client Request)|
+|:---|:---|
+|**Main Home Page**|`http://localhost:3000/?password=pwd1234`|
+|**Shop Home Page**|`http://localhost:3000/shop/?password=pwd1234`|
+|**Pencil Detials**|`http://localhost:3000/shop/about/pencil/77?password=pwd1234`|
+|**Fetch Posts**|`http://localhost:3000/shop/fetch/posts?password=pwd1234`|
+
+
+## Code
+### `index.js`
 ```js
 const express = require('express');
 const app = express();
@@ -56,7 +75,7 @@ app.listen(port, () => {
 });
 ```
 
-## `shopRoute.js`
+### `shopRoute.js`
 ```js
 const express = require('express');
 const axios = require('axios');
@@ -92,3 +111,4 @@ router.get('/fetch/posts', async (req, res) => {
 
 module.exports = router;
 ```
+@rodrigcasio
