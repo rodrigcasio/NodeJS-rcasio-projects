@@ -15,3 +15,80 @@ In this API, we are introducing the concept of `Application-level middleware` an
 |Middleware execution order| The App-level Middleware is placed **before** all `app.use('/shop', shopRouter)` and `app.get('/')` calls.| **Express is sequential**. This correct placements dictates the security checks (authentication) that must run before the routes or routers that are meant to protect|
 |**Scoped router-level Middleware**| the function attached using `router.use((req, res, next) => { ... })` in `shopRoute.js`. it runs a **timestamp logging** (`[Shop Router] Requested at :.. *time*`)| This can be identified as **Scoped Logic**. It makes sures that this logging step of this **timestamp** happens only for request especifically realted for `/shop`, (e.g., `/shop , /shop/about/pencil/:id and /shop/fetch/posts`). This prevents unnecessary logs for the main '/' route|
 |**Short Circuiting the Chain**| The App-level middleware uses `return res.status(402).send('The user cannot login, please enter password....')`| This is how the middleware **stops** the request. If the password is wrong, the middlware sends a response  and does not call `next()`, immediately halting the request and preventing access to the routes.|
+
+## Techniques learned for this API
+|Code| Concept|
+|:---|:---|
+|`app.use((req, res, next) => { ... })`|**Application-Level Middleware Definition**(acts as a global check)|
+|`if (req.params.password !== 'pwd1234'){ return  res.status(402).send(...) }`| **Middleware short circuit** (blocking unauthorized requests)|
+|**Placing the** `app.use((req, res, next) => { ... })` `middleware` **before** `app.use('/short', shopRouter)`| Importance of execution order. (Security before access)|
+
+## Code
+
+```js
+const express = require('express');
+const app = express();
+const port = 3000;
+
+const shopRouter = require('./shopRoute');
+
+// app-level middleware     1. mouting the app-level middlerware FIRST
+app.use((req, res, next) => {
+    if (req.query.password !== "pwd1234"){
+        return res.status(402).send('The user cannot login, please enter password in URL');
+    }
+    console.log(`Successfully entered the right password ✅`);
+    console.log(`Time: ${new Date().toISOString()}`);
+    next();
+});
+
+// 2. then mount the router, so the pwd check protects it
+app.use('/shop', shopRouter);
+
+//3. also protected !
+app.get('/', (req, res) => {
+    res.send('Welcome, you are in the main Home page ☻');
+});
+
+// must enter "/?password=pwd1234"
+app.listen(port, () => {                
+    console.log(`Server listening at: http://localhost:${port}`);
+});
+```
+
+## `shopRoute.js`
+```js
+const express = require('express');
+const axios = require('axios');
+
+const router = express.Router();
+
+router.use((req, res, next) => {
+    console.log(`[Shop Router] Requested at: ${new Date().toISOString()}`);
+    next();
+});
+
+router.get('/', (req, res) => {
+    res.send('You reached the Shop Home page');
+});
+
+router.get('/about/pencil/:id', (req, res) => {
+    pencilId = req.params.id;
+    res.send(`Information about pencil ID: ${pencilId} ✏️`);
+});
+
+router.get('/fetch/posts', async (req, res) => {
+    try {
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
+        res.json({
+            message: "Succesfully fetch posts with axios!",
+            data: response.data.slice(0, 3)
+        });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send('Error fetching data');
+    }
+});
+
+module.exports = router;
+```
