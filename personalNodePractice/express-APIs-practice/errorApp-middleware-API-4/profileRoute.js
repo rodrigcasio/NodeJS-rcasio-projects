@@ -44,10 +44,11 @@ router.get('/fetch/friends', async (req, res) => {
             data: response.data.slice(0, 3)
         });
     } catch (err) {
-        console.log(err.message);
-        res.status(500).send('Error fetching friends data');
-        throw err;
-    }
+        console.log(err.message);      // logging failure locally for debugging
+        console.log('Error fetching data!');
+
+        return next(err);    // passing the error obj to the error handler middleware
+    }     
 });
 
 // 3. === Router-Level Error Middleware ===
