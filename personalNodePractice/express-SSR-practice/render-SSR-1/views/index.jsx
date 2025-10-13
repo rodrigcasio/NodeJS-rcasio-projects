@@ -16,8 +16,9 @@ const HelloMessage = (props) => {
                 <div className="container">
                     <h1>Server-Side Render Content</h1>
                     <p>This message was rendered by the Express server using the data passed from the route:</p>
-                    <p>Hello, <span>{name}</span>!</p>
-                    <div>
+                    <p>Hello, <span className="name">{name}!</span></p>
+
+                    <div className="footer">
                         Rendered Time: {timestamp}
                     </div>
                 </div>
