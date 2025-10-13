@@ -1,6 +1,7 @@
 // main server file
 
 const express = require('express');
+const path = require('path');
 const app = express();
 const expressViews = require('express-react-views');
 const port = 3000;
@@ -8,17 +9,19 @@ const port = 3000;
 const jsxEngine = expressViews.createEngine({});            
 
 app.set('view engine', 'jsx');
-app.set('views', '/views');
+app.set('views', path.join(__dirname, 'views'));
 app.engine('jsx', jsxEngine);
 
-app.get('/:name', (req, res) => {
-    const dynamicName = req.params.name;
+app.use(express.static(path.join(__dirname, 'public')));
 
-    console.log(`[Server Log] Rendering page for user: ${dynamicName} `);
+app.get('/:name', (req, res) => {
+    const userName = req.params.name;
+    const currentTime = new Date().toLocaleDateString();
+    console.log(`[Server Log] Rendering page for user: ${dynamicName}`);
 
     res.render('index', {
-        name: dynamicName,
-        timestamp: new Date().toLocaleDateString()
+        name: userName,
+        timestamp: currentTime
     });
 });
 
