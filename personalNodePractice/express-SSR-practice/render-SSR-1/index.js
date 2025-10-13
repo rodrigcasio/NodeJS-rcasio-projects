@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:name', (req, res) => {
     const userName = req.params.name;
     const currentTime = new Date().toLocaleDateString();
-    console.log(`[Server Log] Rendering page for user: ${dynamicName}`);
+    console.log(`[Server Log] Rendering page for user: ${userName}`);
 
     res.render('index', {
         name: userName,
