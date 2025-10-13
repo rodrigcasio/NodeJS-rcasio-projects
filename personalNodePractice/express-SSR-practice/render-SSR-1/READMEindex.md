@@ -2,7 +2,7 @@
 
 ## Intro
 This project serves as a practice for the foundational example of **Server-Side-Rendering (SSR)** using, of course.. *Express* and *React*.
-My Goal here is to use SSR to render the initial HTML page on the server before sending it to the client. which it improves page load speed, and ensures immediate content avaible to search engines for better SEO.
+My Goal here is to use SSR to render the initial HTML page on the server before sending it to the client. which it improves page load speed, and ensures immediate content avaible to search engines for better SEO (**Search Engine Optimization**) *in simple terms.. making sure engines like `Google` can easily **read** and **understand** this webpage, so that the page shows up higher in search results*
 
 Another purpose I have in this exercise practice with SSR express.. is to move beyond creating simple JSON APIs with Express, and instead, use it as a full **web page server**. By integrating the `express-react-views` engine, Express was able to dynamically generate personilized HTML pages directly, giving me a powerful way to deliver highly readable content before any client-side JavaScript loads.
 
