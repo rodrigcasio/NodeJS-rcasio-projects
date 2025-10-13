@@ -1,8 +1,14 @@
 # Example of a Express `Server-Side-Rendering` Content
 
+## Intro
+This project serves as a practice for the foundational example of **Server-Side-Rendering (SSR)** using, of course.. *Express* and *React*.
+My Goal here is to use SSR to render the initial HTML page on the server before sending it to the client. which it improves page load speed, and ensures immediate content avaible to search engines for better SEO.
+
+Another purpose I have in this exercise practice with SSR express.. is to move beyond creating simple JSON APIs with Express, and instead, use it as a full **web page server**. By integrating the `express-react-views` engine, Express was able to dynamically generate personilized HTML pages directly, giving me a powerful way to deliver highly readable content before any client-side JavaScript loads.
+
 `/render-SSR-1/index.js` **Main Express Server / Controller **
-`/views/index.jsx` **The Template**
-`/public/styles.css` **CSS styles for template within a folder identified to be static content**
+`/views/index.jsx` **The React Template**
+`/public/styles.css` **CSS styles `Static Asset` for template within a folder identified to be static content**
 
 ## 🏛️ Code Structure
 
@@ -17,10 +23,10 @@
 ```js
 const express = require('express');
 const path = require('path');
-const react = require('react');
+const React = require('react');
 
 const app = express();
-const port = 3000;
+const PORT = 3000;
 ```
 
 2. **Setting up the Public folder (*the one created for CSS applied in the `index.jsx`*)**
@@ -33,7 +39,7 @@ app.use(express.static(path.join(__dirname, 'public')));
     - This tells the **Express** where to find the `Template` files.
     - Here we are using `path.join()` and `__dirname` to make sure the folder is found 100% of the time.
 ```js
-app.use('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'views'));
 ```
 3.1 Here we set the file extension to look for (`.jsx`)
 ```js
@@ -41,7 +47,7 @@ app.set('view engine', 'jsx');
 ```
 3.2 We tell express to use `express-react-views` engine to process these .jsx files.
 ```js
-app.engine('jsx', require('express-react-engine').createEngine({
+app.engine('jsx', require('express-react-views').createEngine({
     pretty: true            // makes the final HTML look clean when it is view the source.
 }));
 ```
@@ -55,7 +61,7 @@ app.engine('jsx', require('express-react-engine').createEngine({
 ```js
 app.get('/:name', (req, res) => {
     const userName = req.params.name;
-    const currentTime = new Date().ToLocaleTimeString();
+    const currentTime = new Date().toLocaleTimeString();
     
     console.log(`[Server Log] Rendering page for user ${userName}`);
 
@@ -70,7 +76,7 @@ app.get('/:name', (req, res) => {
 ```
 6. Finally.. **Staring the Engine**
 ```js
-app.listen(Port, () => {
+app.listen(PORT, () => {
     console.log(`Express SSR Application is running ☑️. Open in browser: http://localhost:${port}/User`);
 });
 ```
