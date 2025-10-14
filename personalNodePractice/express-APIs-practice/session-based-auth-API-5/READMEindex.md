@@ -1,5 +1,17 @@
 # Pratice for Session-Based-Authentication with `express`
 
+##  🙋 Intro
+
+`why`
+
+This express application serves as a practice session, and getting my hands dirty in a example of **Session-Based Authentication** in using `express-session` dependency. By implementing the core logic across the server file and a `simulation` of a database with users credentials, `express-session` middleware uses secure cookies to maintain a user's logged-in session in multiple requests.
+
+`flow`
+
+This .md files demonstrates documentation outlining the lifecycle of a user session in a `Node.js Express Application`. The main goal is to clearly define the role of the key components needed, including the authentication middleware (`gatekeeper`), `/login` route that obtains the session `cookie`, and finally the `/logout` that destroys the session.
+
+## Files 📂
+
 `/session-based-auth-API-5/index.js` **Main Server Application**
 `/session-based-auth-API-5/users-db.js` **Simulated user database**
 `/session-based-auth-API-5/test-auth.http` **HTTP REQUEST TESTER**
