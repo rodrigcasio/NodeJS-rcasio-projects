@@ -2,7 +2,7 @@
 // ( in a real app, this data would come from a secure database )
 
 const users = [ 
-    { id: 1, username: 'user', password: 'password', role: 'member' },
+    { id: 1, username: 'Rodrigo', password: 'password123', role: 'member' },
     { id: 2, username: 'admin', password: 'adminpassword', role: 'admin' }
 ];
 

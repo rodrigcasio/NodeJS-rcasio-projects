@@ -11,8 +11,8 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-    "username": "user",
-    "password": "password"
+    "username": "Rodrigo",
+    "password": "password123"
 }
 
 ### 4. Access PROTECTED dashboard ( Should succeed: since I logged in)
