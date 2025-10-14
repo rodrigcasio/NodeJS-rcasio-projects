@@ -4,7 +4,7 @@
 // 1
 const express = require('express');
 const session = require('express-session');
-const { findUser }= require('./users-db');
+const { findUser } = require('./users-db');
 
 const app = express();
 const PORT = 3000;
@@ -16,7 +16,7 @@ app.use(express.json());            // middleware allowing express to read incom
 app.use(session({
     secret: 'my_super_secret_signing_key_12345',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
 }));
 
 //4.  (post endpoint, [handling login attempts])

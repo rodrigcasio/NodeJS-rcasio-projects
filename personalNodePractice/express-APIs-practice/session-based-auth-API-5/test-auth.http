@@ -1,4 +1,4 @@
-### Testing API using HTTP REST CLIENT
+### Test script 
 
 ### 1. Clearing any axisting sesssion (good practice)
 GET http://localhost:3000/logout
