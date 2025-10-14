@@ -1,0 +1,26 @@
+### Test script 
+
+### 1. Clearing any axisting sesssion (good practice)
+GET http://localhost:3000/logout
+
+### 2. Attempt to accessing the protected '/dashboard' (should fail since I havent logged in)
+GET http://localhost:3000/dashboard
+
+### 3. LOGIN (post request with JSON body)
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+    "username": "Rodrigo",
+    "password": "password123"
+}
+
+### 4. Access PROTECTED dashboard ( Should succeed: since I logged in)
+# the client sends the cookie set in Step 3 (what ? waht does that mean)
+GET http://localhost:3000/dashboard
+
+### 5. LOGOUT (destroying the session cookie on the server)
+GET http://localhost:3000/logout
+
+### 6. Atempting Dashboard Access again (should fail: 401 Access Denied)
+GET http://localhost:3000/dashboard
