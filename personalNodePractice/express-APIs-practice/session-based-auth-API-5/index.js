@@ -3,7 +3,7 @@
 
 // 1
 const express = require('express');
-const express = require('express-session');
+const session = require('express-session');
 const { findUser }= require('./users-db');
 
 const app = express();
@@ -22,11 +22,10 @@ app.use(session({
 //4.  (post endpoint, [handling login attempts])
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-
     const user = findUser(username, password);
 
-    if (user){
-        req.session.user = username;
+    if (user) {
+        req.session.user = user.username;
         req.session.role = user.role;
         
         res.status(200).send({ message: 'Loggin successful ✅', username: user.username });     // are we sending responses as JSON messages ?
@@ -45,3 +44,25 @@ app.get('/logout', (req, res) => {
     });
 });
 
+// 5. Protected dashboard endpoints 
+// middleware function  to check if the user is authenticated ( this will be used in the next endpoint '/dashboard' )
+const isAuthenticated = (req, res, next) => {
+    if (req.session.user){
+        next();
+    } else {
+        res.status(401).send({ message: 'Access denied ❌. Please log in first'});
+    }
+}
+
+//5.1
+// GET endpoint for the dashboard ( protected by isAuthenticated middleware )
+app.get('/dashboard', isAuthenticated, (req, res) => { 
+    res.send(`Welcome to the protected dashboard, ${req.session.user}! Your role is: ${req.session.role}.`);
+});
+
+//6 Start server
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Test Login: POST to /login with { "username": "user", "password": "password" }`);
+    console.log(`Test Access: GET http://localhost:${PORT}/dashboard`);
+});

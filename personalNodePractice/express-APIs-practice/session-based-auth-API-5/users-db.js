@@ -11,4 +11,4 @@ const findUser = (username, password) => {
     return users.find(user => user.username === username && user.password === password);
 }
 
-module.exports = findUser;
+module.exports = { findUser };
