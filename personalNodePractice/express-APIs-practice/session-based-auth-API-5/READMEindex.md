@@ -295,5 +295,27 @@ const findUser = (username, password) => {
 module.exports = { findUser };
 ```
 
+### `test-auth.http`
+```http
+# 1
+GET http://localhost:3000/logout
+
+
+GET http://localhost:3000/dashboard
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+    "username": "Rodrigo",
+    "password": "password123"
+}
+
+GET http://localhost:3000/dashboard
+
+GET http://localhost:3000/logout
+
+GET http://localhost:3000/dashboard
+```
 
 @rodrigcasio
