@@ -281,7 +281,19 @@ app.listen(PORT, () => {
 });
 ```
 
+### `users-db.js`
+```js
+const users = [
+    { id: 1, username: 'Rodrigo', password: 'password123', role: 'member' },
+    { id: 2, username: 'admin', password: 'adminpassword', role: 'admin' }
+];
 
+const findUser = (username, password) => {
+    return users.find(user => user.username === username && password === user.password);
+}
+
+module.exports = { findUser };
+```
 
 
 @rodrigcasio
