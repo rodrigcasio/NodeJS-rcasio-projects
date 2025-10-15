@@ -277,6 +277,7 @@ app.get('/dashboard', isAuthenticated, (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Testa Login: POST to /login with JSON text { "username": "Rodrigo", "password": "password123" }`);
+    console.log(`To access dashboard: GET http://localhost:${PORT}/dashboard`);
 });
 ```
 
