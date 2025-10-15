@@ -99,7 +99,7 @@ app.use(session({
         - 4.0 ` const { username, password } = req.body`. is a JavaScript operator that only works because `req.body` is a **JavaScript Object**
             - 4.0.1 It looks looks at the **JavaScript Object** stored in `req.body`.
             - 4.0.2 It creates two constants `username` and `password`.
-            - 4.0.3 The names isnide the `{}` (username, password) **must match** the properties (keys) of the JavaScript object `req.body`.
+            - 4.0.3 The names inside the `{}` (username, password) **must match** the properties (keys) of the JavaScript object `req.body`.
         - 4.1 checking credentials.. (`user = findUser(...)`)
             -  4.1.1 Checks the credentials with the const variables `{ username, password }`, which holds the values from the response JavaScript Object `req.body`
         - 4.2 If `user` true...
@@ -236,7 +236,7 @@ app.use(express.json());
 app.use(session({
     secret : 'my_super_secret_signing_key_12345',
     resave: false,
-    saveUnintizilized: false
+    saveUnintialized: false
 }));
 
 app.post('/login', (req, res) => {
@@ -281,7 +281,41 @@ app.listen(PORT, () => {
 });
 ```
 
+### `users-db.js`
+```js
+const users = [
+    { id: 1, username: 'Rodrigo', password: 'password123', role: 'member' },
+    { id: 2, username: 'admin', password: 'adminpassword', role: 'admin' }
+];
+
+const findUser = (username, password) => {
+    return users.find(user => user.username === username && password === user.password);
+}
+
+module.exports = { findUser };
+```
+
+### `test-auth.http`
+```http
+# 1
+GET http://localhost:3000/logout
 
 
+GET http://localhost:3000/dashboard
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+    "username": "Rodrigo",
+    "password": "password123"
+}
+
+GET http://localhost:3000/dashboard
+
+GET http://localhost:3000/logout
+
+GET http://localhost:3000/dashboard
+```
 
 @rodrigcasio
