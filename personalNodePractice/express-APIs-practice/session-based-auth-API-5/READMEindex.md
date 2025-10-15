@@ -10,6 +10,23 @@ This express application serves as a practice session, and getting my hands dirt
 
 This .md files demonstrates documentation outlining the lifecycle of a user session in a `Node.js Express Application`. The main goal is to clearly define the role of the key components needed, including the authentication middleware (`gatekeeper`), `/login` route that obtains the session `cookie`, and finally the `/logout` that destroys the session.
 
+## ✔ Data Flow and Authentication Process in `simple terms`
+**Functionality involved**:
+
+| # | Code |
+|:---|:---|
+|1.| (REST POST request with JSON data) `POST http://localhost:3000/login Content-Type: application/json {    "username": 'Rodrigo", "password": "password123" }` |
+|2.| `app.use(express.json())`|
+|3.|`app.post('/login', (req, res) => { ... })`|
+
+1. **Raw JSON Data Sent**: The `POST` request with the JSON block is the **raw JSON text** being sent over the network.
+
+2. **Middleware Conversion**: The server notices the `POST` request, and the `app.use(express.json())` **middleware** intercepts the raw JSON text and converts it into a usable **JavaScript Object** stored in `req.body`.
+
+3. **Destructuring & Extracting**: The `const { username, password } = req.body` used within the `app.post('/login', (req, res) => )`, uses **destructuring** to pull the values of the matching properties of the `POST` (`Rodrigo` , `password123`) out of the `req.body` object and assign them to local constans (`{ username, password }`).
+
+4. **Database Lookup**: The local constants `{ username, password }`  are passed as arguments to `findUser(username, password)`, which performs the validation against the simulated database `users-db.js` ( which are placed these objects into an array named `users` )
+
 ## Files 📂
 
 `/session-based-auth-API-5/index.js` **Main Server Application**
@@ -59,9 +76,9 @@ const { findUser } = require('./users-db.js');
 ```
 
 2. **Creating Middleware for Handling Request Body and Session**
-    - `app.use(express.json());` *Allows Express to read incoming JSON data from POST request ( like login form)
-    - *`express.json()` middleware reads this string (the data) and converts it into a usable **JavaScript Object** `{ username: 'Rorigo', password: 'password123' }`*
-    - This middleware attaches this new **JavaScript Object** to the request as `req.body`.
+    - `app.use(express.json());` this middleware **parses** JSON text.. meaning that handles the conversion of incoming JSON raw text from the `POST` `PUT` `PATCH` and converts this data into a JS object and makes it available in `req.body`.
+    - *`express.json()` middleware reads this string (the data) and converts it into a usable **JavaScript Object (req.body)**  `{ username: 'Rorigo', password: 'password123' }`*
+    - The raw JSON text was converted into a JavaScript object (req.body) by the middleware, and in the next step we use `descructuring` which simply extracts the values from that object.
 ```js
 app.use(express.json());
 ```
@@ -84,6 +101,7 @@ app.use(session({
             - 4.0.2 It creates two constants `username` and `password`.
             - 4.0.3 The names isnide the `{}` (username, password) **must match** the properties (keys) of the JavaScript object `req.body`.
         - 4.1 checking credentials.. (`user = findUser(...)`)
+            - Checks the credentials with the const variables `{ username, password }`, which holds the values from the response JavaScript Object `req.body`
         - 4.2 If `user` true.. sets the session properties, (`req.session.user = user.username`) this makes the server remember the user
         - 4.3 Sending a successful or failure JSON Response
 ```js
