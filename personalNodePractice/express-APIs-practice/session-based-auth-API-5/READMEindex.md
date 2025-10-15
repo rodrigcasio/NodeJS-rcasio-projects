@@ -59,7 +59,9 @@ const { findUser } = require('./users-db.js');
 ```
 
 2. **Creating Middleware for Handling Request Body and Session**
-    - `app.use(express.jso());` *Allows Express to read incoming JSON data from POST request ( like login form)
+    - `app.use(express.json());` *Allows Express to read incoming JSON data from POST request ( like login form)
+    - *`express.json()` middleware reads this string (the data) and converts it into a usable **JavaScript Object** `{ username: 'Rorigo', password: 'password123' }`*
+    - This middleware attaches this new **JavaScript Object** to the request as `req.body`.
 ```js
 app.use(express.json());
 ```
@@ -77,6 +79,10 @@ app.use(session({
 
 4. **Set up `/login` Endpoint (POST)**
     - This code handles the login attempt
+        - 4.0 ` const { username, password } = req.body`. is a JavaScript operator that only works because `req.body` is a **JavaScript Object**
+            - 4.0.1 It looks looks at the **JavaScript Object** stored in `req.body`.
+            - 4.0.2 It creates two constants `username` and `password`.
+            - 4.0.3 The names isnide the `{}` (username, password) **must match** the properties (keys) of the JavaScript object `req.body`.
         - 4.1 checking credentials.. (`user = findUser(...)`)
         - 4.2 If `user` true.. sets the session properties, (`req.session.user = user.username`) this makes the server remember the user
         - 4.3 Sending a successful or failure JSON Response
@@ -178,5 +184,38 @@ GET http://localhost:3000/logout
 ```http
 GET http://localhost:3000/dashboard
 ```
+
+##  🏞️ FULL CODE
+
+### `index.js`
+
+```js
+const express = require('express');
+const session = require('express-session');
+const { findUser } = require('./users-db.js');
+
+const app = express();
+const PORT = 3000;
+
+app.use(express.json());
+
+app.use(session({
+    secret : 'my_super_secret_signing_key_12345',
+    resave: false,
+    saveUnintizilized: false
+}));
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = findUser(username, password);
+
+    if (user){
+        req.session.user = user.username;
+        req.session.role = user.role;
+    }
+})
+
+```
+
 
 @rodrigcasio
