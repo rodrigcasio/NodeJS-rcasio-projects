@@ -251,9 +251,36 @@ app.post('/login', (req, res) => {
     } else {
         res.status(401).send({ message: 'Could not log in ❌ Invalid username or password' })
     }
-})
+});
 
+app.get('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err){
+            return res.status(500).send({ message: 'Could not logout ❌' });
+        }
+        res.status(200).send({ message: 'Successful Logout ✔ Until Next Time 👋🏻' });
+    });
+});
+
+const isAuthenticated = (req, res, next) => {
+    if (req.session.user) {
+        next();
+    } else {
+        res.status(401).send({ message: 'Access Denied ❌. Please Log in first' });
+    }
+}
+
+app.get('/dashboard', isAuthenticated, (req, res) => {
+    res.send(`Welcome to the Protected Dashboard 🎛️ ${req.session.user}. Your role is ${req.session.role}! `);
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Testa Login: POST to /login with JSON text { "username": "Rodrigo", "password": "password123" }`);
+});
 ```
+
+
 
 
 @rodrigcasio
