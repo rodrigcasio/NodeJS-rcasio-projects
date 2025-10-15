@@ -38,9 +38,9 @@ app.post('/login', (req, res) => {
 app.get('/logout', (req, res) => {
     req.session.destroy(err => {
         if (err){
-            return res.status(500).send({ message: 'Could not logout ❌'});
+            return res.status(500).send({ message: 'Could not logout ❌' });
         }
-        res.status(200).send({message: 'Successful logout!. Until nextime 👋🏻'});
+        res.status(200).send({ message: 'Successful logout!. Until nextime 👋🏻' });
     });
 });
 
@@ -57,7 +57,7 @@ const isAuthenticated = (req, res, next) => {
 //5.1
 // GET endpoint for the dashboard ( protected by isAuthenticated middleware )
 app.get('/dashboard', isAuthenticated, (req, res) => { 
-    res.send(`Welcome to the protected dashboard, ${req.session.user}! Your role is: ${req.session.role}.`);
+    res.send(`Welcome to the protected dashboard 🎛️ , ${req.session.user}! Your role is: ${req.session.role}.`);
 });
 
 //6 Start server
