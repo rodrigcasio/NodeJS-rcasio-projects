@@ -101,9 +101,20 @@ app.use(session({
             - 4.0.2 It creates two constants `username` and `password`.
             - 4.0.3 The names isnide the `{}` (username, password) **must match** the properties (keys) of the JavaScript object `req.body`.
         - 4.1 checking credentials.. (`user = findUser(...)`)
-            - Checks the credentials with the const variables `{ username, password }`, which holds the values from the response JavaScript Object `req.body`
-        - 4.2 If `user` true.. sets the session properties, (`req.session.user = user.username`) this makes the server remember the user
-        - 4.3 Sending a successful or failure JSON Response
+            -  4.1.1 Checks the credentials with the const variables `{ username, password }`, which holds the values from the response JavaScript Object `req.body`
+        - 4.2 If `user` true...
+            - 4.2.1 Creating custom properites `req.session.user = user.username` and `req.sesssion.role = user.role`. This action signals `express-session` middleware: **"This user is now authenticated, save this information please"**
+            - 4.2.1 The server saves the state `user: 'Rodrigo', role: 'member'` in its memory (or session stored) AND THEN, sends the **Session ID Cookie** to the client. (*Important*) ( this req.session.user is later used in `isAuthentcated` middleware to confirm the user is logged in )
+            - 4.2.2 Finally.. *Express magic (conversion)* express converts (technically serializes) this response `.send({ message: 'Login Succesful ✅', username: user.username })` into a **JSON string** and it adds an **HTTP header**: `Content-Type: application/json`
+            - 4.2.3 Lastly..  (over the network): the server sends this **JSON string** back to the client (my REST Client `test-auth.http` or the browser), and it is the standard way to transmit structured data over the internet!!!.
+        - 4.3 if `user` is false..
+            - 4.3.1 Sends 
+
+`simple terms`:
+- **req.session** is like a locked box on the server where i keep the user's ID card (`username`) and their key to the building (`role`)
+- The **Session ID Cookie** is the small key the user holds
+- Everytime the user makes a request, they show the key (cookie), the server opens the box (req.session), and quickly checks the contents to confirm the users's identity and permisions.. in (`isAuthenticated` middleware)
+
 ```js
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
@@ -136,6 +147,11 @@ app.get('/logout', (req, res) => {
     - *this middleware `isAuthenticated` will be placed in the endpoint `/dashboard` to secure the GET request 
     - `if (req.session.user) {` Checks if the server remembers the user (via the session cookie)
     - `next();` if user is logged in.. it moves on and allows access... if not `Access Denied...`.
+
+`simple terms` :
+- **req.session** is like a locked box on the server where i keep the user's ID card (`username`) and their key to the building (`role`)
+- The **Session ID Cookie** is the small key the user holds
+- Everytime the user makes a request, they show the key (cookie), the server opens the box (req.session), and quickly checks the contents to confirm the users's identity and permisions.. in (`isAuthenticated` middleware)
 ```js
 const isAuthenticated = (req, res, next) => {
     if (req.session.user) {
@@ -230,6 +246,10 @@ app.post('/login', (req, res) => {
     if (user){
         req.session.user = user.username;
         req.session.role = user.role;
+        
+        res.status(200).send({ message: 'Login Successful ✅', username: user.username });
+    } else {
+        res.status(401).send({ message: 'Could not log in ❌ Invalid username or password' })
     }
 })
 
