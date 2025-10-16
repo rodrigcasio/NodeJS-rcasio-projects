@@ -27,6 +27,8 @@ const SECRET_KEY = 'my_super_secure_jwt_secret_key_7890';
 ```
 
 2. **Middleware `verifyToken`**
+*`verifyToken` middleware acts like a digital ID scanner, it receives the digital ID scan (`token`), scans it with the `SECRET_KEY`, and only if the card is authentic and not expired, does it allow the user to pass through to the `/dashboard`*
+
     | code | does |
     |:---|:---|
     |- **2.0** `const authHeader = req.headers['authorization'];`| When the client (like the `test-auth.http`) makes a request to a protected route (`/dashboard`), it **must** include the `Authorization` **header**. This is the common standard for passing **JWTs**. The value looks like this: `Bearer ayJAjssdaYHBajsdjfkas`|
@@ -66,9 +68,6 @@ const SECRET_KEY = 'my_super_secure_jwt_secret_key_7890';
             req.user = decode;
             next();           
         });
-
     }
 ```
-
-
-       
+3. `/login` route
