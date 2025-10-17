@@ -20,7 +20,7 @@ const verifyToken = (req, res, next) => {
         return res.status(401).send({ message: 'Access Denied ❌. Not token provided on Authorization header.' });
     }
 
-    jwt.sign(token, SECRET_KEY, (err, decoded) => {
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
         if (err) {
             res.status(403).send({ message: 'Invalid or expired token ⌛️' });
         }
@@ -30,3 +30,19 @@ const verifyToken = (req, res, next) => {
     });
 }
 
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = findUser(username, password);
+
+    if (user) {
+        const payload = { id: user.id, username: user.username, role: user.role };
+        const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
+
+        return res.status(200).json({
+            message: 'Login Successful ✅. Token provided ⚘.',
+            token: token
+        });
+    } else {
+        res.status(500).send({ message: 'Could not log in ❌ Invalid username or password' });
+    }
+});
