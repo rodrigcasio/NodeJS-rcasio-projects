@@ -26,4 +26,4 @@ Authorization: Bearer {{token}}
 ### 4. Attempt to access with an Invalid Token (Should fail: 403 Forbidden)
 
 GET http://localhost:3000/dashboard
-Authorization: Bearer asoidjaoisjfi
+Authorization: Bearer invalidToken

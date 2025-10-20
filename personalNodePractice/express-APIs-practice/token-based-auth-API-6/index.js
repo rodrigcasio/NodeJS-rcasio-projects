@@ -13,7 +13,7 @@ app.use(express.json());
 
 // JWT verification middleware 
 const verifyToken = (req, res, next) => {
-    const authHeader = req.headers['Authorization'];
+    const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token == null) {
@@ -63,4 +63,4 @@ app.get('/dashboard', verifyToken, (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Token Server running on http://localhost:${PORT}`);
-})
+});
