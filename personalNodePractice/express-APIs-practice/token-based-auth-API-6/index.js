@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
     const authHeader = req.headers['Authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    if (token == NULL) {
+    if (token == null ) {
         return res.status(401).send({ message: 'Access Denied ❌. Not token provided on Authorization header.' });
     }
 
@@ -43,6 +43,6 @@ app.post('/login', (req, res) => {
             token: token
         });
     } else {
-        res.status(500).send({ message: 'Could not log in ❌ Invalid username or password' });
+        res.status(401).send({ message: 'Could not log in ❌ Invalid username or password' });
     }
 });
