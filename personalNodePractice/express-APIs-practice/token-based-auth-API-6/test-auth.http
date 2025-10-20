@@ -1,0 +1,29 @@
+# --- JWT Authentication Testing flow ---
+
+### 1. Attempting to access the guarded /dashboard (should fail: 401 Unauthorized)
+GET http://localhost:3000/dashboard
+
+### 2. Successful Login (POST request)
+POST http://localhost:3000/login
+Content-Type: application/json 
+
+{
+    "username": "Rodrigo",
+    "password": "password123"
+}
+
+# Important: To automatically capture the response token for the next request, it is needed 
+# a response handler 
+@token = {{ response.body.token }}
+
+### 3. Accessing the protected Dashbaord  with token
+# The difference: we must send the token received in the Authorization header.
+# The correct format: Authorization: Bearer <the_jwt_token_here>
+GET http:/localhost:3000/dashboard
+Authorization: Bearer {{token}}
+
+
+### 4. Attempt to access with an Invalid Token (Should fail: 403 Forbidden)
+
+GET http://localhost:3000/dashboard
+Authorization: Bearer asoidjaoisjfi

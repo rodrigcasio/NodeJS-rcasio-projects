@@ -111,3 +111,51 @@ app.post('/login', (req, res) => {
     }
 });
 ```
+
+4.  `app.get('/dashboard', verifyToken, (req, res) => { ... })`
+    - **This route can be known as the protected route**
+
+|Code| Does|
+|:---|:---|
+|4.1 `app.get('/dashboard', verifyToken, (req, res) => { ... })`| Defines the route handler for **GET** HTTP request to the route `/dashboard`.**First it lists `verifyToken` before the main handler function.. This **tells** express: '`Run the **verifyToken** middleware frst`. If the middleware calls `next();`, it will proceed the function `(req, res)`|
+|4.2 `const user = req.user;`| If it reaches this line, it means the `JTW` was successfully verified. The `verifyToken` stored the decoded payload (`{ id: 1, username: 'Rodrigo',  role: 'member }`) onto the **req** object. We can pull the data off the request for easy access |
+|4.3 `if(!user) { .. } ` | While the middleware already handles errors, this provides a safety check. If for some reason, the user data is missing, ( or any internal logic error ocurred before `req.user` was set ) we stop and send an error |
+|4.4 `return res.status(200).json({ message: 'Welcome to the Dashboard, ${user.username}', role: user.role, userPayload: user, });`| Sending a successful **200** OK messsage with personalized content |
+
+```js
+app.get('/dashboard', verifyToken, (req, res) => {
+    const user = req.user;
+    
+    if (!user) {
+        return res.status(500).json({ message: 'Internal Server Error: User data missing after verification' });
+    }
+    
+    return res.status(200).json({
+        message: `Welcome to the Dashboard ${user.username}`,
+        role: user.role,
+        userPayload: user
+    });
+});
+```
+5. `app.listen(PORT ...)` **Launch Server**
+
+```js
+app.listen(PORT, () => {
+    console.log(`Token Server running on http://localhost:${PORT}`) ;
+});
+```
+
+### `users-db.js` **Simulated User Database**
+```js
+const users = [
+    { id: 1, username: 'Rodrigo', password: 'password123', role: 'member'},
+    { id: 2, username: 'Admin', password: 'adminpassword', role: 'admin' }
+];
+
+const findUser = (username, password) => {
+    return users.find(user => user.username === username && user.password === password);
+}
+
+module.exports = { findUser };
+```
+

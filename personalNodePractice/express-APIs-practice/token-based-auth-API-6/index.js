@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
     const authHeader = req.headers['Authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    if (token == null ) {
+    if (token == null) {
         return res.status(401).send({ message: 'Access Denied ❌. Not token provided on Authorization header.' });
     }
 
@@ -46,3 +46,21 @@ app.post('/login', (req, res) => {
         res.status(401).send({ message: 'Could not log in ❌ Invalid username or password' });
     }
 });
+
+app.get('/dashboard', verifyToken, (req, res) => {
+    const user = req.user;
+    
+    if (!user) {
+        return res.status(500).json({ message: 'Internal Server Error: User data is missing after verification.'});
+    }
+    
+    return res.status(200).json({
+        message: `Welcome to the Dashboard ${user.username}`,
+        role: user.role,
+        userPayload: user
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Token Server running on http://localhost:${PORT}`);
+})
