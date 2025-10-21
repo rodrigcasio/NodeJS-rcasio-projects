@@ -14,14 +14,29 @@ app.use(express.json());
 // JWT verification middleware 
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    const cleanToken = token ? token.trim() : null;
 
+    let cleanToken = null;
+
+    if (authHeader) {
+        // -- Robust Extraction Fix 
+        // Using Regex extracting the first string that looks like a JWT (base64 separate by dots)
+        // It ignores 'Bearer ', braces, and any other surrounding junk the client might send 
+        
+        const tokenMatch = authHeader.match(/[a-zA-Z0-9\-_]+\.){2}([a-zA-Z0-9\-_]+)/);
+        if (tokenMatch && tokenMatch[0]) {
+            cleanToken = tokenMatch[0];
+        } else {
+            const token = authHeader.split(' ')[1];
+            cleanToken = token ? token.replace(/["'{}]/g, '').trim() : null;
+        }
+    }
     // Diagnostic to solve issue with FORBIDDEN error 
     console.log('--- VERIFICATION ATTEMPT --- ');
     console.log('Secret Key length:', SECRET_KEY.length);
     console.log('Token Received (Bearer):', authHeader);
+    console.log('Clean Token:', cleanToken ? cleanToken.substring(0, 30) + '...' : 'NULL');
     console.log('Clean Token length', cleanToken ? cleanToken.length : null);
+    console.log(`JWT Verification Status: Trying to verify... `);
 
     if (cleanToken == null) {
         return res.status(401).send({ message: 'Access Denied ❌. Not token provided on Authorization header.' });
