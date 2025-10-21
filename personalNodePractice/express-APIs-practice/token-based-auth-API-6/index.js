@@ -15,13 +15,21 @@ app.use(express.json());
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
+    const cleanToken = token ? token.trim() : null;
 
-    if (token == null) {
+    // Diagnostic to solve issue with FORBIDDEN error 
+    console.log('--- VERIFICATION ATTEMPT --- ');
+    console.log('Secret Key length:', SECRET_KEY.length);
+    console.log('Token Received (Bearer):', authHeader);
+    console.log('Clean Token length', cleanToken ? cleanToken.length : null);
+
+    if (cleanToken == null) {
         return res.status(401).send({ message: 'Access Denied ❌. Not token provided on Authorization header.' });
     }
 
-    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    jwt.verify(cleanToken, SECRET_KEY, (err, decoded) => {
         if (err) {
+            console.log(`JWT Verification Failed: ${err.message}`);
             return res.status(403).send({ message: 'Invalid or expired token ⌛️' });
         }
         
@@ -31,6 +39,8 @@ const verifyToken = (req, res, next) => {
 }
 
 app.post('/login', (req, res) => {
+    console.log('Received login body', req.body);       // quick diagnostic 
+
     const { username, password } = req.body;
     const user = findUser(username, password);
 
