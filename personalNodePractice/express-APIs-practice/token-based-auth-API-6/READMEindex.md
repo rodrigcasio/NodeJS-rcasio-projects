@@ -11,7 +11,7 @@ When using Token authentication, there are important features to keep in mind ab
 1. `index.js` **Main server app**
 2. `users-db.js` **Database simulation**
 
-## Simple Terms 
+## 🆗 Simple Terms 
 
 `Token-Based-Authentication` is like checking into a **members-only** club using a high-tech membership card..
 
@@ -120,12 +120,12 @@ const SECRET_KEY = 'my_super_secure_jwt_secret_key_7890';
         const token = authHeader && authHeader.split(' ')[1];
 
         if (token == null) {
-            return res.status(401).send({ message: 'Access Denied ❌. no token provided on Authorization header' });
+            return res.status(401).json({ message: 'Access Denied ❌. no token provided on Authorization header' });
         }
     
         jwt.verify(token, SECRET_KEY, (err, decoded) => {
             if (err) {
-                return res.status(403).send({ message: 'Invalid or expired token ⌛️' });
+                return res.status(403).json({ message: 'Invalid or expired token ⌛️' });
             }
 
             req.user = decoded;
@@ -169,7 +169,7 @@ app.post('/login', (req, res) => {
             token: token
         });
     } else {
-        res.status(401).send({ message: 'Could not log in ❌ Invalid username or password' });
+        res.status(401).json({ message: 'Could not log in ❌ Invalid username or password' });
     }
 });
 ```
@@ -247,8 +247,8 @@ const verifyToken = (req, res, next) => {
 
     jwt.verify(token.trim(), SECRET_KEY, (err, decoded) => {
         if (err) {
-            console.log('JWT Verification Failed:', err.messsage);
-            return res.status(403).send({ message: 'Invalid or Expired Token ⌛️' });
+            console.log('JWT Verification Failed:', err.message);
+            return res.status(403).json({ message: 'Invalid or Expired Token ⌛️' });
         }   
 
         req.user = decoded;
@@ -280,7 +280,7 @@ app.get('/dashboard', verifyToken, (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error: User data missing after verification'})
     }
 
-    return res.status(200).json({               // is this return keyword necessary?
+    return res.status(200).json({
         message: `Welcome to the Dashboard ${user.username}`,
         role: user.role,
         userPayload: user,
