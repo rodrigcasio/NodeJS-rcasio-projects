@@ -11,6 +11,68 @@ When using Token authentication, there are important features to keep in mind ab
 1. `index.js` **Main server app**
 2. `users-db.js` **Database simulation**
 
+## 🆗 Simple Terms 
+
+`Token-Based-Authentication` is like checking into a **members-only** club using a high-tech membership card..
+
+1. **The Membership Card Creation (Login /POST)
+    1. **Proving Identity**: Giving my name and password to the security desk (the /login route)
+
+    2. **Verify and Create**: The security desk checks their records ( `users-db.js` ). If valid, they dont give a key... but they create an special, signed **Membership Card** (the JWT). This card contains your name and member status (`role`)
+
+    3. **Secure signature**: They sign the card with a **secret stamp** (`SECRET_KEY`) that only the **club** owns. This stamp proves the card is real and hasn't been tampered with.
+
+    4. **Receive the card**: The server gives you the JWT card. **You are responsable for carrying it.
+
+2. **The Membership Card Check** ( acessing `GET` `/dashboard` )
+    1. **Present the Card**: When you approach the VIP room door (the `/dashboard` route), you show your card in the **Authorization Header**.
+
+    2. **The Gatekeeper**: The `verifyToken` middleware acts as the gatekeeper.
+
+    3. **Check number 1: Is it real?**: The gatekeeper uses the club's secret stamp (`SECRET_KEY`) to verify the card's signature.
+        - *If the stamp does not match, or the card is expired -> **403 Forbidden** (you have a card but it is **fake** or useless)
+    
+    4. **Check numeber 2: Who is it?**: If the signature is valid, the gatekeeper safely reads the information from the card (`req.user = decoded`).
+
+    5. **Access Granted**: The gatekeeper says `next()`, allowing you inside the VIP room, and passes your user information to the main route handler, which can now say *Welcome...*.
+
+## 🧩 Token Based Authentication Flow 🌀
+
+Token-Based Authentication is like a digital passport system. When I log in, the server give me a **secure, signed token** instead of a traditional session cookie. Then It is a must to present this token to access protected resources ( in this case the `/dashboard` route )
+
+1. **Authentication Step** (`POST/login`)
+
+|Actor| Action | Code 
+|:---|:---|:---|
+|**Client**| Sends a **username** and **password** in the request body **POST**| `POST http://localhost:3000/login   Content-Type: application/json { ... }|
+|**Server**| 1. Uses `findUser()` to check credentials in the `users-db.js` simulated database| `const user = findUser(username, password);`|
+|**Server**| 2. If valid, creates a **Payload** ( a JavaScript object ) with user data like (`id`, `username`, `role`).| `const payload = { id: user.id, username: user.username, ... }`|
+|**Server**| 3. Creates (in technical terms **signs**) the **JWT** using the `Payload`, the `SECRET_KEY`, and an expiration time| `const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' })`|
+|**Server**| 4. Sends the **JWT string** back in the JSON response.| `return res.status(200).json({ token: token ... });`|
+|**Client**| Stores the received JWT (usually in local storage) `in this case we just copy it.. hehe`| |
+
+2. **The Authorization Step** (`GET/dashboard`)
+
+|Actor|Action| Code|
+|:---|:---|:---|
+|**Client**| Sends the request, placing the token in `Authorization` header prefixed by `Bearer` | `Authorization: Bearer **<the_JWT_TOKEN**`|
+|**Server (middleware)** |1. The important `verifyToken` middleware intercepts the request| `app.get('/dashboard', verifyToken ...)`|
+|**Server (middleware)**| 2. It extracts the **raw token string** from the header `Authorization`| `const token = authHeader && authHeader.split(' ')[1];`|
+|**Server (middleware)**| 3. It **verifies** the token using the **SECRET_KEY**. This checks the signature, integrity and expiration.| `jwt.verify(token, SECRET_KEY, (err, decoded) => )`|
+|**Server (middleware)**|4. If **valid**: The decoded user payload (`id`, `username`, `role`) is attached to the request object (`req.user`) and calls `next()`| `req.user = decoded; next();`|
+|**Server Handler**| 5. The `/dashboard` route handlers receives the request, now containing the user data | `const user = req.user`|
+|**Server Handler**| 6. Sends the personalized data/page back to the client | `res.status(200).json({ message: 'Welcome to the Dashboard ${user.username}!', role: user.role, userPayload: user })`|
+
+(plus) **JWT Verification Failure Cases**
+
+**If** token is invalid during Step `2`, the `jwt.verify` function returns an **err**
+
+|Failure type| Status Code| Reason|
+|:---|:---|:---|
+|**Missing/No Token**| `401 Unauthorized`| The `Authorization` header was missing or empty|
+|**Invalid/Expired Token**| `403 Forbidden`| The token was sent but either the **signature** was wrong, or the token is **expireed**|
+
+
 ## 🏛️ Code Structure 
 
 ## `index.js`
@@ -58,12 +120,12 @@ const SECRET_KEY = 'my_super_secure_jwt_secret_key_7890';
         const token = authHeader && authHeader.split(' ')[1];
 
         if (token == null) {
-            return res.status(401).send({ message: 'Access Denied ❌. no token provided on Authorization header' });
+            return res.status(401).json({ message: 'Access Denied ❌. no token provided on Authorization header' });
         }
     
         jwt.verify(token, SECRET_KEY, (err, decoded) => {
             if (err) {
-                return res.status(403).send({ message: 'Invalid or expired token ⌛️' });
+                return res.status(403).json({ message: 'Invalid or expired token ⌛️' });
             }
 
             req.user = decoded;
@@ -107,7 +169,172 @@ app.post('/login', (req, res) => {
             token: token
         });
     } else {
-        res.status(401).send({ message: 'Could not log in ❌ Invalid username or password' });
+        res.status(401).json({ message: 'Could not log in ❌ Invalid username or password' });
     }
 });
 ```
+
+4.  `app.get('/dashboard', verifyToken, (req, res) => { ... })`
+    - **This route can be known as the protected route**
+
+|Code| Does|
+|:---|:---|
+|4.1 `app.get('/dashboard', verifyToken, (req, res) => { ... })`| Defines the route handler for **GET** HTTP request to the route `/dashboard`.**First it lists `verifyToken` before the main handler function.. This **tells** express: '`Run the **verifyToken** middleware frst`. If the middleware calls `next();`, it will proceed the function `(req, res)`|
+|4.2 `const user = req.user;`| If it reaches this line, it means the `JTW` was successfully verified. The `verifyToken` stored the decoded payload (`{ id: 1, username: 'Rodrigo',  role: 'member }`) onto the **req** object. We can pull the data off the request for easy access |
+|4.3 `if(!user) { .. } ` | While the middleware already handles errors, this provides a safety check. If for some reason, the user data is missing, ( or any internal logic error ocurred before `req.user` was set ) we stop and send an error |
+|4.4 `return res.status(200).json({ message: 'Welcome to the Dashboard, ${user.username}', role: user.role, userPayload: user, });`| Sending a successful **200** OK messsage with personalized content |
+
+```js
+app.get('/dashboard', verifyToken, (req, res) => {
+    const user = req.user;
+    
+    if (!user) {
+        return res.status(500).json({ message: 'Internal Server Error: User data missing after verification' });
+    }
+    
+    return res.status(200).json({
+        message: `Welcome to the Dashboard ${user.username}`,
+        role: user.role,
+        userPayload: user
+    });
+});
+```
+5. `app.listen(PORT ...)` **Launch Server**
+
+```js
+app.listen(PORT, () => {
+    console.log(`Token Server running on http://localhost:${PORT}`) ;
+});
+```
+
+### `users-db.js` **Simulated User Database**
+```js
+const users = [
+    { id: 1, username: 'Rodrigo', password: 'password123', role: 'member'},
+    { id: 2, username: 'Admin', password: 'adminpassword', role: 'admin' }
+];
+
+const findUser = (username, password) => {
+    return users.find(user => user.username === username && user.password === password);
+}
+
+module.exports = { findUser };
+```
+
+## 🩻 Full Code 
+
+### `index.js`
+
+```js
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const { findUser } = require('./users-db');
+
+const app = express();
+const PORT = 3000;
+const SECRET_KEY = 'my_super_secure_jwt_secret_key_7890';
+
+app.use(express.json());
+
+// Middleware gatekeeper
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (token == null) {
+        return res.status(401).send({ message: 'Access Denied ❌. No token provided in Authorization header' });
+    }
+
+    jwt.verify(token.trim(), SECRET_KEY, (err, decoded) => {
+        if (err) {
+            console.log('JWT Verification Failed:', err.message);
+            return res.status(403).json({ message: 'Invalid or Expired Token ⌛️' });
+        }   
+
+        req.user = decoded;
+        next();
+    });
+}
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = findUser(username, password);
+
+    if (user) {
+        const payload = { id: user.id, username: user.username, role: user.role };
+        const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
+
+        return res.status(200).json({
+            message: 'Successful Login ✅ Token provided',
+            token: token
+        });
+    } else {
+        res.status(401).json({ message: 'Could not Log in ❌ Invalid Username or Password' });
+    }
+});
+
+app.get('/dashboard', verifyToken, (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+        return res.status(500).json({ message: 'Internal Server Error: User data missing after verification'})
+    }
+
+    return res.status(200).json({
+        message: `Welcome to the Dashboard ${user.username}`,
+        role: user.role,
+        userPayload: user,
+    }); 
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+});
+```
+
+### `users-db.js`
+
+```js
+const users = [
+    { id: 1, username: 'Rodrigo', password: 'password123', role: 'member' },
+    { id: 2, username: 'Admin', password: 'adminpassword', role: 'admin' }
+];
+
+const findUser = (username, password) => {
+    return users.find(user => user.username === username && user.password === password);
+}
+
+module.exports = { findUser };
+```
+
+### `test-auth.http`
+
+```http
+### 1. Attempting to access the guarded /dashboard (should fail: 401 Unauthorized)
+GET http://localhost:3000/dashboard
+
+### 2. Loggin in (Should be successful)
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+    "username": "Rodrigo",
+    "password": "password123"
+}
+
+### Important: To automatically capture the response token for the next request, it is needed a response handler
+# IT does not work, PLEASE JUST COPY PASTE THE TOKEN Beside Bearer <token>
+@t = {{ response.body.token }}
+
+### 3. Accessing the protected Dashbaord with manually pasting the token
+# The correct format: Authorization: Bearer <the_jwt_token_here>
+# Here we added the full token provided
+GET http://localhost:3000/dashboard
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJSb2RyaWdvIiwicm9sZSI6Im1lbWJlciIsImlhdCI6MTc2MTAxMzE4NywiZXhwIjoxNzYxMDE2Nzg3fQ.A-QAI7nRO9yxYk2EP_1rEy52lQYzqpsbnDQZ2ZHXy5c
+
+### 4. Attempt to access with an Invalid Token (Should fail: 403 Forbidden)
+GET http://localhost:3000/dashboard
+Authorization: Bearer invalidToken
+```
+
+@rodrigcasio

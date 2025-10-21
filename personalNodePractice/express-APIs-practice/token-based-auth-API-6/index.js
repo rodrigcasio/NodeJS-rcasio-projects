@@ -13,16 +13,17 @@ app.use(express.json());
 
 // JWT verification middleware 
 const verifyToken = (req, res, next) => {
-    const authHeader = req.headers['Authorization'];
+    const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-
-    if (token == NULL) {
+    
+    if (token == null) {
         return res.status(401).send({ message: 'Access Denied ❌. Not token provided on Authorization header.' });
     }
 
-    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    jwt.verify(token.trim(), SECRET_KEY, (err, decoded) => {
         if (err) {
-            res.status(403).send({ message: 'Invalid or expired token ⌛️' });
+            console.log(`JWT Verification Failed: ${err.message}`);
+            return res.status(403).send({ message: 'Invalid or expired token ⌛️' });
         }
         
         req.user = decoded;
@@ -31,6 +32,8 @@ const verifyToken = (req, res, next) => {
 }
 
 app.post('/login', (req, res) => {
+    console.log('Received login body', req.body);       // quick diagnostic 
+
     const { username, password } = req.body;
     const user = findUser(username, password);
 
@@ -43,6 +46,71 @@ app.post('/login', (req, res) => {
             token: token
         });
     } else {
-        res.status(500).send({ message: 'Could not log in ❌ Invalid username or password' });
+        res.status(401).send({ message: 'Could not log in ❌ Invalid username or password' });
     }
 });
+
+app.get('/dashboard', verifyToken, (req, res) => {
+    const user = req.user;
+    
+    if (!user) {
+        return res.status(500).json({ message: 'Internal Server Error: User data is missing after verification.'});
+    }
+    
+    return res.status(200).json({
+        message: `Welcome to the Dashboard ${user.username}`,
+        role: user.role,
+        userPayload: user
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Token Server running on http://localhost:${PORT}`);
+});
+
+
+/*
+
+// JWT verification middleware 
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+
+    let cleanToken = null;
+
+    if (authHeader) {
+        // -- Robust Extraction Fix 
+        // Using Regex extracting the first string that looks like a JWT (base64 separate by dots)
+        // It ignores 'Bearer ', braces, and any other surrounding junk the client might send 
+        
+        const tokenMatch = authHeader.match(/([a-zA-Z0-9\-_]+\.){2}([a-zA-Z0-9\-_]+)/);
+        if (tokenMatch && tokenMatch[0]) {
+            cleanToken = tokenMatch[0];
+        } else {
+            const token = authHeader.split(' ')[1];
+            cleanToken = token ? token.replace(/["'{}]/g, '').trim() : null;
+        }
+    }
+    // Diagnostic to solve issue with FORBIDDEN error 
+    console.log('--- VERIFICATION ATTEMPT --- ');
+    console.log('Secret Key length:', SECRET_KEY.length);
+    console.log('Token Received (Bearer):', authHeader);
+    console.log('Clean Token:', cleanToken ? cleanToken.substring(0, 30) + '...' : 'NULL');
+    console.log('Clean Token length', cleanToken ? cleanToken.length : null);
+    console.log(`JWT Verification Status: Trying to verify... `);
+
+    if (cleanToken == null) {
+        return res.status(401).send({ message: 'Access Denied ❌. Not token provided on Authorization header.' });
+    }
+
+    jwt.verify(cleanToken, SECRET_KEY, (err, decoded) => {
+        if (err) {
+            console.log(`JWT Verification Failed: ${err.message}`);
+            return res.status(403).send({ message: 'Invalid or expired token ⌛️' });
+        }
+        
+        req.user = decoded;
+        next();
+    });
+}
+
+*/
