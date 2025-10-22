@@ -118,4 +118,7 @@ app.get('/dashboard', (req, res) => {
     });
 });
 
-
+app.listen(PORT, () => {
+    console.log(`Passwordless Server running at http://localhost:${PORT}`);
+    console.log(`Available ENDPOINTS: POST '/request-access', POST '/verify-token', GET '/dashboard'`);
+});
