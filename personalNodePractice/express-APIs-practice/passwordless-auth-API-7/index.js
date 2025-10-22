@@ -97,4 +97,25 @@ app.post('/verify-code', (req, res) => {
     }
 });
 
+app.get('/dashboard', (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Access Denied ❌. Token required.' });
+    }
+
+    jwt.verify(token.trim(), SECRET_KEY, (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid or Expired Token ⌛️' });
+        }
+        
+        return res.status(200).json({
+            message: `Welcome to the Dashboard ${decoded.email}. Your User ID is ${decoded.id}.`,
+            access_level: decoded.role,
+            token_payload: decoded
+        });
+    });
+});
+
 
