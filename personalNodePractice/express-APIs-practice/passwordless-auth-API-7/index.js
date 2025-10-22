@@ -25,3 +25,32 @@ const sendEmail = (email, code) => {
     console.log(`========================\n`);
 }
 
+app.post('/request-access', (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) {
+        res.status(401).json({ message: 'Email address is required'});
+    }
+    
+    const user = findUserEmail(email);
+
+    if (!user) {     // for hackers
+        sendEmail(email, 'fake-code');
+        res.status(200).json({
+            message: `Verification code successfully sent to ${email}. Check your console.`
+        });
+    }
+
+    const code = generateSecureCode();
+    const ExpiresAt = Date.now() + (5 * 60 * 1000);
+
+    codeStore[email] = {
+        code,
+        expires: expiresAt,
+        userId: user.id,
+        userRole: user.role
+    };
+
+    sendEmail(email, code);
+
+});
