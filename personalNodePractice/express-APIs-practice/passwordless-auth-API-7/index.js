@@ -25,35 +25,3 @@ const sendEmail = (email, code) => {
     console.log(`========================\n`);
 }
 
-app.post('/login', (req, res) => {
-    const { email } = req.body;
-    if (!email) {
-        res.status(400).json({ message: 'Email address is required' });
-    }
-    
-    const user = findUserEmail(email);      // database lookup
-
-    if (!user) {        // sending fake email
-        sendEmail( email, 'fake_code');
-        return res.status(202).json({
-            message: `Verification code successfully snet to ${email}. Check your console.`,
-        });
-    }
-
-    const code = generateSecureCode();
-    const expiresAt = Date.now() + (5 * 6 * 1000);      // 5 min in mls
-
-    codeStore[email] = {
-        code,
-        expires: expiresAt,
-        userId: user.id,
-        userRole: user.role
-    };
-    
-    sendEmail(email, code);
-    
-    return res.status(202).json({
-        message: `Verification code successfully sent to ${email}. Check your console.`
-    });
-
-});
