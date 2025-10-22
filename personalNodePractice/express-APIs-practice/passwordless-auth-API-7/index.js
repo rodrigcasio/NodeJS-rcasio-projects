@@ -8,7 +8,7 @@ const app = express();
 const PORT = 3000;
 const SECRET_KEY = 'my_passwordlesss_secret_key_123';
 
-const codeStore = {};
+const codeStore = {};   // in-memory storage (for temporary verification codes) 
 
 app.use(express.json());
 
@@ -57,3 +57,44 @@ app.post('/request-access', (req, res) => {
         message: `Verification code successfully sent to ${email}. Check your console`,
     });
 });
+
+app.post('/verify-code', (req, res) => {
+    const { code, email } = req.body;
+
+    if (!code || !email) {
+        return res.status(400).json({ message: 'Email and verification code are required.' });
+    }
+
+    const storedData = codeStore[email];  
+    
+    // security checks:
+    if (!storedData) {   // 1
+        return res.status(401).json({ message: 'Invalid code or access request'});
+    }
+    
+    if (Data.now() > storedData.expires) {  // 2
+        delete codeStore[email];  // clear expired code
+        return res.status(401).json({ message: 'Code expired. Please request a new code' });
+    }
+    
+    if (storedData.code === code) {     // 3
+        delete codeStore[email];    
+
+        const payload = {
+            id: storedData.id,
+            email: email,
+            role: storedData.userRole
+        };
+
+        const accessToken = jwt.sign(payload, SECRET_KEY, { expireIn: '1h' });
+        return res.status(200).json({
+            message: 'Verification successful. Access Token provided',
+            token: accessToken,
+            user: payload
+        });
+    } else {
+        res.status(401).json({ message: 'Invalid code or acess request' });
+    }
+});
+
+

@@ -113,11 +113,11 @@ const codeStore = {};
         const { code, email } = req.body;
     
     if (!email || !code) {
-        res.status(400).json({ message: 'Email verification code are required.' });
+        return res.status(400).json({ message: 'Email verification code are required.' });
     }
     // ... 
     ```
-    - 5.2 Retrieve the stored code data.
+    - 5.2 Retrieve the stored code data. storedData is reference to the **value** of the property key `email` ( `storedData = { code, expires: expiresAt.. }`)
     ```js
     const storedData = codeStore[email];
     ```
@@ -128,10 +128,11 @@ const codeStore = {};
     }
     ```
     - 5.4 Check #2. Is the code expired?
+        - Clearing expired code with: `delete codeStore[email];`
     ```js
     if (Date.now() > storedData.expires) {
-        delete storedData;
-        res.status(401).json({ message: 'Code expired. Please request a new access code.' });
+        delete codeStore[email];    
+        return res.status(401).json({ message: 'Code expired. Please request a new access code.' });
     }
     ```
     - 5.5 Check #3 Does the code match?
@@ -143,7 +144,7 @@ const codeStore = {};
     - 5.5.1 **Success** if the code is valid and not expired:
     **Cleanup**: Remove the used code immediately ( single-use requirement )
         ```js
-        delete codeStore[emial];
+        delete codeStore[email];
         ```
     - 5.5.2 **Granting access**: Preparing the user payload.
         ```js
