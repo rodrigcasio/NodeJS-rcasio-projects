@@ -10,7 +10,7 @@ Content-Type: application/json
 # The server will output the code needed for the next step
 
 # Copy the code in the teminal an pasting it here:
-@verificationCode = 
+@verificationCode =
 
 ### 2. Verify Code (successful access)
 # Server sends email and the code. Server verifies and issues a JWT.

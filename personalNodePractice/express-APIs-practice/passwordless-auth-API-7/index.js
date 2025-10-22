@@ -35,7 +35,7 @@ app.post('/request-access', (req, res) => {
     const user = findUserEmail(email);
 
     if (!user) {                                               // to decieve hackers (security step, using fake code)
-        sendEmail(email, '83883');
+        sendEmail(email, 'fake_code');
         return res.status(200).json({
             message: `Verification code successfully sent to ${email}. Check your console`
         });
