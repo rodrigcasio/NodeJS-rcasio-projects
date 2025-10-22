@@ -82,7 +82,6 @@ const codeStore = {};
     ```
 
     - 4.4. Storing the temporary code along with the necessary user data in the in-memory store
-        - ( email within the [] becomes a **dynamic property key** `not` a *nested object*, that holds the **literal object** `{ code: 'no valueAtTheMoment', expires: expiresAt ... })` )
     ```js
     codeStore[email] = {
         code,
@@ -117,7 +116,7 @@ const codeStore = {};
     }
     // ... 
     ```
-    - 5.2 Retrieve the stored code data. 
+    - 5.2 Retrieve the stored code data.
     ```js
     const storedData = codeStore[email];
     ```
