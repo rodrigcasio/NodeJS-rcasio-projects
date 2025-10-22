@@ -54,7 +54,7 @@ const codeStore = {};
         const { email } = req.body;
 
         if (!email) {
-            res.status(400).json({ message: 'Email address is required' });
+            return res.status(400).json({ message: 'Email address is required' });
         }
 
     //...
@@ -81,7 +81,8 @@ const codeStore = {};
     const expiresAt = Date.now() + (5 * 60 * 1000);     // 5 min of life
     ```
 
-    - 4.4. Storing the temporary code along with the necessary user data in the in-memory store
+    - 4.4. Storing the temporary code along with the necessary user data in the in-memory store 
+        - (*email becomes becomes a **dynamic property key**, not an object. with this key property `email`, this one holds a literal object [no name needed]. eg : `codeStore = { 'rodrigo.test@dev.com': { code: '', expires: expiresAt, userId: user.id ... }}`)
     ```js
     codeStore[email] = {
         code,
