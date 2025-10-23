@@ -289,11 +289,126 @@ Content-Type: application/json
 ## Full Code
 
 ### `index.js`
-
 ```js
+const express = require('express');
+const nodemailer = require('nodemailer');
+const jwt = ('jsonwebtoken');
+const crypto = ('crypto');
 
+const app = express();
+const PORT = 3000;
+const SECRET_KEY = 'my_passwordless_secret_key_123';
+
+const codeStore = {};
+
+// helper functions:
+const sendEmail = (email, code) => {
+    console.log(`=======================\n`);
+    console.log(`   Simulated Email Sent ✉️`);
+    console.log(`   to: ${email}`);
+    console.log(`   Verification code: ${code} (Expires in 5 min)`);
+    console.log(`=========================`);
+}
+
+const generateSecureCode = () => {
+    return crypto.randomBytes(3).readUIntBE(0, 3).toString().padStart(6, '0').slice(-6);
+}
+
+// start:
+app.use(express.json());
+
+app.post('/request-token', (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: 'Email Address is required.' });
+    }
+    const user = findUserEmail(email);
+    if (!user) {        // security step, to decieve hackers:
+        sendEmail(email, 'fake_code');
+        return res.status(200).json({
+            message: `Verification Code successfully sent to ${email}. Check your console`
+        });
+    }
+
+    const code = generateSecureCode()
+    const expiresAt = Date.now() + (5 * 60 * 1000); // in 5 min in mls
+    codeStore[email] = {
+        code,
+        expires: expiresAt,
+        userId: user.id,
+        userRole: user.role
+    };
+    sendEmail(email, code);
+    return res.status(200).json({
+        message: `Verification code successfully sent to ${email}. Check your console`
+    });
+});
+
+app.post('/verify-code', (req, res) => {
+    const { email, code } = req.body;
+    
+    if (!email || !code) {
+        return res.status(400).json({ message: 'Email and verification code are required.' });
+    }
+
+    const storedData = codeStore[email];
+    // 3 security checks:
+    if (!storedData) {  // 1.
+        return res.status(401).json({ messsage: 'Invalid code or access request' });
+    }
+
+    if (Date.now() > storedData.expires) {  // 2.
+        delete codeStore[email];
+        res.status(401).json({ message: 'Code expired. Please request a new code' });
+    }
+    
+    if (storedData.code === code) { // 3. if true.. continue 
+        delete codeStore[email];
+        
+        const payload = {
+            id: storedData.userId,
+            email: email,
+            role: storedData.userRole
+        };
+        const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
+        
+        return res.status(200).json({
+            message: 'Verification successful. Token provided 🧩',
+            token: accessToken,
+            user: payload
+        });
+    } else {
+        res.status(401).json({ message: 'Invalid code or access request ❌' });
+    }
+});
+
+app.get('/dashboard', (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        res.status(401).json({ message: 'Access Denied 🙅. Token required.' });
+    }
+
+    jwt.verify(token.trim(), SECRET_KEY, (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid or Expired Token ⌛️'});
+        }
+
+        return res.status(200).json({
+            message: `Welcome to the Dashboard 🙋 ${decoded.email}. Your user ID is ${decoded.userRole}`,
+            acess_level: decoded.role,
+            user: payload,
+            token: decoded
+        });
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Available ENDPOINTS: POST '/request-access', POST '/verify-code', GET '/dashboard'`);
+})
 ```
-
 ### `user-database.js`
 ```js
 

@@ -6,7 +6,7 @@ const { findUserEmail } = require('./user-database');
 
 const app = express();
 const PORT = 3000;
-const SECRET_KEY = 'my_passwordlesss_secret_key_123';
+const SECRET_KEY = 'my_passwordless_secret_key_123';
 
 const codeStore = {};   // in-memory storage (for temporary verification codes) 
 
@@ -21,7 +21,7 @@ const sendEmail = (email, code) => {
     console.log(`\n=======================`);
     console.log(`   Simualted Email Sent `);
     console.log(`   to: ${email}`);
-    console.log(`   Verification Code: ${code} (Expires in 5 minutes)`);
+    console.log(`   Verification Code: ${code} (Expires in 5 minutes ‼️)`);
     console.log(`========================\n`);
 }
 
@@ -29,7 +29,7 @@ app.post('/request-access', (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-        return res.status(400).json({ message: 'Email address is required.' });
+        return res.status(400).json({ message: 'Email address is required ⚠️ ' });
     }
 
     const user = findUserEmail(email);
@@ -54,7 +54,7 @@ app.post('/request-access', (req, res) => {
     sendEmail(email, code);
 
     return res.status(200).json({
-        message: `Verification code successfully sent to ${email}. Check your console`,
+        message: `Verification code successfully ✅ sent to ${email}. Check your console`,
     });
 });
 
@@ -69,12 +69,12 @@ app.post('/verify-code', (req, res) => {
     
     // security checks:
     if (!storedData) {   // 1
-        return res.status(401).json({ message: 'Invalid code or access request'});
+        return res.status(401).json({ message: 'Invalid code or access request ❌'});
     }
     
     if (Date.now() > storedData.expires) {  // 2
         delete codeStore[email];  // clear expired code
-        return res.status(401).json({ message: 'Code expired. Please request a new code' });
+        return res.status(401).json({ message: 'Code expired ⌛️. Please request a new code' });
     }
     
     if (storedData.code === code) {     // 3
@@ -88,12 +88,12 @@ app.post('/verify-code', (req, res) => {
 
         const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
         return res.status(200).json({
-            message: 'Verification successful. Access Token provided',
+            message: 'Verification successful. Access Token provided 🧩',
             token: accessToken,
             user: payload
         });
     } else {
-        res.status(401).json({ message: 'Invalid code or acess request' });
+        res.status(401).json({ message: 'Invalid code or access request ❌' });
     }
 });
 
@@ -111,7 +111,7 @@ app.get('/dashboard', (req, res) => {
         }
         
         return res.status(200).json({
-            message: `Welcome to the Dashboard ${decoded.email}. Your User ID is ${decoded.userId}.`,
+            message: `Welcome to the Dashboard 🙋 ${decoded.email}. Your User ID is ${decoded.userId}.`,
             access_level: decoded.role,
             token_payload: decoded
         });
