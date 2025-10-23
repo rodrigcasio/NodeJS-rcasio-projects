@@ -5,6 +5,22 @@ In this practice, we are simulating a similar process of a `Passwordless authent
 - /verify-code `POST REQUEST`
 - /dashboard `Protected Resource`
 
+## Intro 🙋
+
+This is a **Passwordless Authentication API** that lets users sign in without relying on username/password. It simulates by sending a unique, temporary code to the user's email, then the user must verify the code to receive a **token** to access protected resources.
+
+This practice contains a **Passwordless Token-Based Authentication API** using Node.js and **Express** framework. This small project demonstrates a simple example demonstrating a modern, secure and user-friendly alrternative to traditional athentication with username/password logins
+
+## Code Mechanism Flow 🌀
+ 
+Intead or relying on stored passwords, this API implements a **two-step** or **One-Time** Passcode (OTP) flow:
+
+1. User request access with their email `/request-access`.
+2. Then, the server generates a random 6-digit code and stores it in memory.
+3. The user recieves the code via email if **email** credential matched the database.
+4. The user sends a `POST` request to verify the code provided by the server. If code is **valid**, the server issues a **JSON Web Token** (`JWT`).
+5. Finally, This token is then used by client/user to access the protected resource `/dashboard`, making sure a secure, stateless authentication takes place and for subsequent request as well.
+
 ## 🏛️ Code Structure
 
 ### `index.js` Main server app
@@ -227,7 +243,7 @@ const users = [
 ```
 2. **Creating** function to find a user by email address:
 ```js
-const finfUserEmail = (email) => {
+const findUserEmail = (email) => {
     return users.find(user => user.email === email);
 }
 ```
@@ -317,7 +333,7 @@ const generateSecureCode = () => {
 // start:
 app.use(express.json());
 
-app.post('/request-token', (req, res) => {
+app.post('/request-access', (req, res) => {
     const { email } = req.body;
     if (!email) {
         return res.status(400).json({ message: 'Email Address is required.' });
@@ -398,8 +414,7 @@ app.get('/dashboard', (req, res) => {
         return res.status(200).json({
             message: `Welcome to the Dashboard 🙋 ${decoded.email}. Your user ID is ${decoded.userRole}`,
             acess_level: decoded.role,
-            user: payload,
-            token: decoded
+            token_payload: decoded
         });
     });
 });
