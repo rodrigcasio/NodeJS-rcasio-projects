@@ -5,7 +5,6 @@ In this practice, we are simulating a similar process of a `Passwordless authent
 - /verify-code `POST REQUEST`
 - /dashboard `Protected Resource`
 
-
 ## 🏛️ Code Structure
 
 ### `index.js` Main server app
@@ -54,13 +53,13 @@ const codeStore = {};
         const { email } = req.body;
 
         if (!email) {
-            res.status(400).json({ message: 'Email address is required' });
+            return res.status(400).json({ message: 'Email address is required' });
         }
 
     //...
     ```
 
-    - 4.2 Lookup user in the permanent database `user-database.js` with the exported function `{ finfUserEmail }`
+    - 4.2 Lookup user in the permanent database `user-database.js` with the exported function `{ findUserEmail }`
     ```js
     const user = findUserEmail(email);
     ```
@@ -81,7 +80,8 @@ const codeStore = {};
     const expiresAt = Date.now() + (5 * 60 * 1000);     // 5 min of life
     ```
 
-    - 4.4. Storing the temporary code along with the necessary user data in the in-memory store
+    - 4.4. Storing the temporary code along with the necessary user data in the in-memory store 
+        - (*email becomes becomes a **dynamic property key**, not an object. with this key property `email`, this one holds a literal object [no name needed]. eg : `codeStore = { 'rodrigo.test@dev.com': { code: '', expires: expiresAt, userId: user.id ... }}`)
     ```js
     codeStore[email] = {
         code,
@@ -112,11 +112,11 @@ const codeStore = {};
         const { code, email } = req.body;
     
     if (!email || !code) {
-        res.status(400).json({ message: 'Email verification code are required.' });
+        return res.status(400).json({ message: 'Email verification code are required.' });
     }
     // ... 
     ```
-    - 5.2 Retrieve the stored code data.
+    - 5.2 Retrieve the stored code data. storedData is reference to the **value** of the property key `email` ( `storedData = { code, expires: expiresAt.. }`)
     ```js
     const storedData = codeStore[email];
     ```
@@ -127,10 +127,11 @@ const codeStore = {};
     }
     ```
     - 5.4 Check #2. Is the code expired?
+        - Clearing expired code with: `delete codeStore[email];`
     ```js
     if (Date.now() > storedData.expires) {
-        delete storedData;
-        res.status(401).json({ message: 'Code expired. Please request a new access code.' });
+        delete codeStore[email];    
+        return res.status(401).json({ message: 'Code expired. Please request a new access code.' });
     }
     ```
     - 5.5 Check #3 Does the code match?
@@ -142,7 +143,7 @@ const codeStore = {};
     - 5.5.1 **Success** if the code is valid and not expired:
     **Cleanup**: Remove the used code immediately ( single-use requirement )
         ```js
-        delete codeStore[emial];
+        delete codeStore[email];
         ```
     - 5.5.2 **Granting access**: Preparing the user payload.
         ```js
@@ -187,6 +188,7 @@ const codeStore = {};
     //..
     ```
     - 6.2 **Verify** the JWT.
+        - Trimming the token is important for defensive practice to remove potencial whitespaces from the **Bearer** header.
     ```js
     jwt.verify(token.trim(), SECRET_KEY, (err, decoded) => {
         if (err) {
@@ -283,3 +285,178 @@ Content-Type: application/json
     "code": "000000"
 }
 ``` 
+
+## Full Code
+
+### `index.js`
+```js
+const express = require('express');
+const nodemailer = require('nodemailer');
+const jwt = ('jsonwebtoken');
+const crypto = ('crypto');
+
+const app = express();
+const PORT = 3000;
+const SECRET_KEY = 'my_passwordless_secret_key_123';
+
+const codeStore = {};
+
+// helper functions:
+const sendEmail = (email, code) => {
+    console.log(`=======================\n`);
+    console.log(`   Simulated Email Sent ✉️`);
+    console.log(`   to: ${email}`);
+    console.log(`   Verification code: ${code} (Expires in 5 min)`);
+    console.log(`=========================`);
+}
+
+const generateSecureCode = () => {
+    return crypto.randomBytes(3).readUIntBE(0, 3).toString().padStart(6, '0').slice(-6);
+}
+
+// start:
+app.use(express.json());
+
+app.post('/request-token', (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: 'Email Address is required.' });
+    }
+    const user = findUserEmail(email);
+    if (!user) {        // security step, to decieve hackers:
+        sendEmail(email, 'fake_code');
+        return res.status(200).json({
+            message: `Verification Code successfully sent to ${email}. Check your console`
+        });
+    }
+
+    const code = generateSecureCode()
+    const expiresAt = Date.now() + (5 * 60 * 1000); // in 5 min in mls
+    codeStore[email] = {
+        code,
+        expires: expiresAt,
+        userId: user.id,
+        userRole: user.role
+    };
+    sendEmail(email, code);
+    return res.status(200).json({
+        message: `Verification code successfully sent to ${email}. Check your console`
+    });
+});
+
+app.post('/verify-code', (req, res) => {
+    const { email, code } = req.body;
+    
+    if (!email || !code) {
+        return res.status(400).json({ message: 'Email and verification code are required.' });
+    }
+
+    const storedData = codeStore[email];
+    // 3 security checks:
+    if (!storedData) {  // 1.
+        return res.status(401).json({ messsage: 'Invalid code or access request' });
+    }
+
+    if (Date.now() > storedData.expires) {  // 2.
+        delete codeStore[email];
+        res.status(401).json({ message: 'Code expired. Please request a new code' });
+    }
+    
+    if (storedData.code === code) { // 3. if true.. continue 
+        delete codeStore[email];
+        
+        const payload = {
+            id: storedData.userId,
+            email: email,
+            role: storedData.userRole
+        };
+        const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
+        
+        return res.status(200).json({
+            message: 'Verification successful. Token provided 🧩',
+            token: accessToken,
+            user: payload
+        });
+    } else {
+        res.status(401).json({ message: 'Invalid code or access request ❌' });
+    }
+});
+
+app.get('/dashboard', (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        res.status(401).json({ message: 'Access Denied 🙅. Token required.' });
+    }
+
+    jwt.verify(token.trim(), SECRET_KEY, (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid or Expired Token ⌛️'});
+        }
+
+        return res.status(200).json({
+            message: `Welcome to the Dashboard 🙋 ${decoded.email}. Your user ID is ${decoded.userRole}`,
+            acess_level: decoded.role,
+            user: payload,
+            token: decoded
+        });
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Available ENDPOINTS: POST '/request-access', POST '/verify-code', GET '/dashboard'`);
+})
+```
+### `user-database.js`
+```js
+const users = [
+    { id: 101, email: 'rodrigo.test@dev.com', name: 'Rodrigo', role: 'admin' },
+    { id: 102, email: 'test@user.com', name: 'Test-User', role: 'guest' },
+];
+
+const findUserEmail = (email) => {
+    return users.find(user => user.email === email);
+}
+
+module.exports = { findUserEmail };
+```
+
+### `test-auth.http`
+```http
+### 1.
+POST http://localhost:3000/request-access
+Content-Type: application/json
+
+{
+    "email": "rodrigo.test@dev.com"
+}
+
+@verificationCode = "adding_code_shown_in_console"
+
+### 2.
+POST http://localhost:3000/verify-code
+Content-Type: application/json
+
+{
+    "email": "rodrigo.test@dev.com",
+    "code": "{{verificationCode}}"
+}
+
+@jwtToken = 'full_token_placed_here_manually"
+
+### 3.
+GET http://localhost:3000/dashboard
+Authorization: Bearer {{jwtToken}}
+
+### 4. (should fail, testing with a fake code)
+POST http://localhost:3000/verify-code
+Content-Type: application/json
+
+{
+    "email": "rodrigo.test@dev.com",
+    "code": "000000"
+}
+```
+@rodrigcasio

@@ -7,10 +7,10 @@ Content-Type: application/json
 }
 
 ### 1.2 After running the request above, it will be provided the 6-digit code in the terminal
-# The server will output the code needed for the next step
+### The server will output the code needed for the next step
 
-# Copy the code in the teminal an pasting it here:
-@verificationCode = 
+#### Copy the code in the teminal an pasting it here:
+@verificationCode = 120746
 
 ### 2. Verify Code (successful access)
 # Server sends email and the code. Server verifies and issues a JWT.
@@ -19,23 +19,20 @@ Content-Type: application/json
 
 {
     "email": "rodrigo.test@dev.com",
-    "code": {{verificationCode}}
+    "code": "{{verificationCode}}"
 }
-
-# Campturing the generated token JWT if possible, if not in the next request
+### Campturing the generated token JWT if possible, if not in the next request
 # place the full token into the 3. GET '/dashboard' protected request
-@jwtToken = {{ verification.body.token }}
+# Placing full token here
+@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJvZHJpZ28udGVzdEBkZXYuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzYxMTc4MjMzLCJleHAiOjE3NjExODE4MzN9.x69MdRYCmhIFa4eg4AJzFZenMT6UOGPnEYS3BIq75rw 
 
 ### 3. Access the protected /dashboard (using the JWT) 
-# Using the token obtained in step 2 (jwtToken) IF POSSIBLE
-```http
+### Using the token obtained in step 2 (jwtToken) IF POSSIBLE
 GET http://localhost:3000/dashboard
 Authorization: Bearer {{jwtToken}}
-```
 
 ### 4. Verification Failure Test
 # Testing what happens when the code is wrong (should fail)
-```http
 POST http://localhost:3000/verify-code
 Content-Type: application/json 
 
@@ -43,4 +40,3 @@ Content-Type: application/json
     "email": "rodrigo.test@dev.com",
     "code": "000000"
 }
-```

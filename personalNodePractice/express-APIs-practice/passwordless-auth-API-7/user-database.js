@@ -5,7 +5,7 @@ const users = [
 ];
 
 const findUserEmail = (email) => {
-    return users.find(user => email.user === email);
+    return users.find(user => user.email === email);
 }
 
 module.exports = { findUserEmail };
