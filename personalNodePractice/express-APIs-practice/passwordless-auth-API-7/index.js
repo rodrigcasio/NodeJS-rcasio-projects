@@ -72,7 +72,7 @@ app.post('/verify-code', (req, res) => {
         return res.status(401).json({ message: 'Invalid code or access request'});
     }
     
-    if (Data.now() > storedData.expires) {  // 2
+    if (Date.now() > storedData.expires) {  // 2
         delete codeStore[email];  // clear expired code
         return res.status(401).json({ message: 'Code expired. Please request a new code' });
     }
@@ -86,7 +86,7 @@ app.post('/verify-code', (req, res) => {
             role: storedData.userRole
         };
 
-        const accessToken = jwt.sign(payload, SECRET_KEY, { expireIn: '1h' });
+        const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
         return res.status(200).json({
             message: 'Verification successful. Access Token provided',
             token: accessToken,
@@ -111,7 +111,7 @@ app.get('/dashboard', (req, res) => {
         }
         
         return res.status(200).json({
-            message: `Welcome to the Dashboard ${decoded.email}. Your User ID is ${decoded.id}.`,
+            message: `Welcome to the Dashboard ${decoded.email}. Your User ID is ${decoded.userId}.`,
             access_level: decoded.role,
             token_payload: decoded
         });

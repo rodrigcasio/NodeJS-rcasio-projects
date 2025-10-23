@@ -285,3 +285,21 @@ Content-Type: application/json
     "code": "000000"
 }
 ``` 
+
+## Full Code
+
+### `index.js`
+
+```js
+
+```
+
+### `user-database.js`
+```js
+
+```
+
+### `test-auth.http`
+```js
+
+```
