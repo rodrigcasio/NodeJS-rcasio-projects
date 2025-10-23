@@ -10,7 +10,7 @@ Content-Type: application/json
 ### The server will output the code needed for the next step
 
 #### Copy the code in the teminal an pasting it here:
-@verificationCode = 120746
+@verificationCode = 641723
 
 ### 2. Verify Code (successful access)
 # Server sends email and the code. Server verifies and issues a JWT.
@@ -24,7 +24,7 @@ Content-Type: application/json
 ### Campturing the generated token JWT if possible, if not in the next request
 # place the full token into the 3. GET '/dashboard' protected request
 # Placing full token here
-@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJvZHJpZ28udGVzdEBkZXYuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzYxMTc4MjMzLCJleHAiOjE3NjExODE4MzN9.x69MdRYCmhIFa4eg4AJzFZenMT6UOGPnEYS3BIq75rw 
+@jwtToken = "token_provided_by_the_server"
 
 ### 3. Access the protected /dashboard (using the JWT) 
 ### Using the token obtained in step 2 (jwtToken) IF POSSIBLE
