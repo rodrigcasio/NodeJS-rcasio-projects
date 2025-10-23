@@ -5,7 +5,6 @@ In this practice, we are simulating a similar process of a `Passwordless authent
 - /verify-code `POST REQUEST`
 - /dashboard `Protected Resource`
 
-
 ## 🏛️ Code Structure
 
 ### `index.js` Main server app

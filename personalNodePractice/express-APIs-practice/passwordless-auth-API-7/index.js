@@ -53,7 +53,7 @@ app.post('/request-access', (req, res) => {
     
     sendEmail(email, code);
 
-    return res.status(200).json({
+    return res.status(202).json({
         message: `Verification code successfully ✅ sent to ${email}. Check your console`,
     });
 });
