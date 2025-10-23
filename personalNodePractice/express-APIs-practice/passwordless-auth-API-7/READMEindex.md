@@ -411,10 +411,52 @@ app.listen(PORT, () => {
 ```
 ### `user-database.js`
 ```js
+const users = [
+    { id: 101, email: 'rodrigo.test@dev.com', name: 'Rodrigo', role: 'admin' },
+    { id: 102, email: 'test@user.com', name: 'Test-User', role: 'guest' },
+];
 
+const findUserEmail = (email) => {
+    return users.find(user => user.email === email);
+}
+
+module.exports = { findUserEmail };
 ```
 
 ### `test-auth.http`
-```js
+```http
+### 1.
+POST http://localhost:3000/request-access
+Content-Type: application/json
+
+{
+    "email": "rodrigo.test@dev.com"
+}
+
+@verificationCode = "adding_code_shown_in_console"
+
+### 2.
+POST http://localhost:3000/verify-code
+Content-Type: application/json
+
+{
+    "email": "rodrigo.test@dev.com",
+    "code": "{{verificationCode}}"
+}
+
+@jwtToken = 'full_token_placed_here_manually"
+
+### 3.
+GET http://localhost:3000/dashboard
+Authorization: Bearer {{jwtToken}}
+
+### 4. (should fail, testing with a fake code)
+POST http://localhost:3000/verify-code
+Content-Type: application/json
+
+{
+    "email": "rodrigo.test@dev.com",
+    "code": "000000"
+}
 
 ```
