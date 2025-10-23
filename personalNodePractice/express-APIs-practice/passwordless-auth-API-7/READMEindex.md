@@ -5,6 +5,22 @@ In this practice, we are simulating a similar process of a `Passwordless authent
 - /verify-code `POST REQUEST`
 - /dashboard `Protected Resource`
 
+## Intro 🙋
+
+This is a **Passwordless Authentication API** that lets users sign in without relying in username/password. It simulates by sending a unique, temporary code to the user's email, then the user must verify the code to receive a **token** to access protected resources.
+
+This practice contains a **Passwordless Token-Based Authentication API** using Node.js and **Express** framework. This small project demosntrates a simple example demonstrating a modern, secure and user-friendly alrternative to traditional athentication with username/password logins
+
+## Code Mechanism Flow 🌀
+ 
+Intead or relying on stored passwords, this API implements a **two-step** or **One-Time** Passcode (OTP) flow:
+
+1. User request access with their email `/request-access`.
+2. Then, the server generates a random 6-digit code and stores it in memory.
+3. The user recieves the code via email if **email** credential matched the database.
+4. The user sends a `POST` request to verify the code provided by the server. If code is **valid**, the server issues a **JSON Web Token** (`JWT`).
+5. Finally, This token is then used by client/user to access the protected resource `/dashboard`, making sure a secure, stateless authentication takes place and for subsequent request as well.
+
 ## 🏛️ Code Structure
 
 ### `index.js` Main server app
