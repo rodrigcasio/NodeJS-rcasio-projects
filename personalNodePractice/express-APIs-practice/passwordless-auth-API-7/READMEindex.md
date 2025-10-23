@@ -60,7 +60,7 @@ const codeStore = {};
     //...
     ```
 
-    - 4.2 Lookup user in the permanent database `user-database.js` with the exported function `{ finfUserEmail }`
+    - 4.2 Lookup user in the permanent database `user-database.js` with the exported function `{ findUserEmail }`
     ```js
     const user = findUserEmail(email);
     ```
@@ -189,6 +189,7 @@ const codeStore = {};
     //..
     ```
     - 6.2 **Verify** the JWT.
+        - Trimming the token is important for defensive practice to remove potencial whitespaces from the **Bearer** header.
     ```js
     jwt.verify(token.trim(), SECRET_KEY, (err, decoded) => {
         if (err) {
@@ -458,5 +459,5 @@ Content-Type: application/json
     "email": "rodrigo.test@dev.com",
     "code": "000000"
 }
-
 ```
+@rodrigcasio

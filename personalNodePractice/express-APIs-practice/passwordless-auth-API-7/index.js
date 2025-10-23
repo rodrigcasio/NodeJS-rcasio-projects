@@ -36,7 +36,7 @@ app.post('/request-access', (req, res) => {
 
     if (!user) {                                               // to decieve hackers (security step, using fake code)
         sendEmail(email, 'fake_code');
-        return res.status(200).json({
+        return res.status(202).json({
             message: `Verification code successfully sent to ${email}. Check your console`
         });
     }
@@ -81,7 +81,7 @@ app.post('/verify-code', (req, res) => {
         delete codeStore[email];    
 
         const payload = {
-            id: storedData.id,
+            id: storedData.userId,
             email: email,
             role: storedData.userRole
         };
@@ -111,7 +111,7 @@ app.get('/dashboard', (req, res) => {
         }
         
         return res.status(200).json({
-            message: `Welcome to the Dashboard 🙋 ${decoded.email}. Your User ID is ${decoded.userId}.`,
+            message: `Welcome to the Dashboard 🙋 ${decoded.email}. Your User ID is ${decoded.id}.`,
             access_level: decoded.role,
             token_payload: decoded
         });
