@@ -1,0 +1,23 @@
+---
+swagger: "2.0"
+info:
+  description: "<h2>This is a sample server code the is generated from Swagger Documenation\
+    \ with Swagger Editor</h2>"
+  version: "1.0"
+  title: "Our first generated REST API"
+paths:
+  /greetings:
+    get:
+      tags:
+      - "Hello in Different Languages"
+      summary: "Returns a list of Greetings"
+      description: "Returns greetings in different languages"
+      operationId: "greetingsGET"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+      x-swagger-router-controller: "HelloInDifferentLanguages"
+definitions: {}
