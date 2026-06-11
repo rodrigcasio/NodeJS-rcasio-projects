@@ -7,8 +7,8 @@
  *
  * no response value expected for this operation
  **/
-exports.greetingsGET = function() {
-  return new Promise(function(resolve, reject) {
+exports.greetingsGET = function () {
+  return new Promise(function (resolve, reject) {
 
     let hellos = {
       "English": "hello",
@@ -24,6 +24,8 @@ exports.greetingsGET = function() {
       "Korean": "anyoung haseyo",
       "Russian": "Zdravstvuyte"
     }
+
+
 
     resolve(hellos);
   });
